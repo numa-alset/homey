@@ -1,16 +1,21 @@
 # homey
 
-A Real Estate Flutter project.
+A Real Estate Flutter project.\
+help you find best property for rental based on filters and chat directly with owner.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+✔️ Responsive and Adaptive screens \
+✔️ Provider state management\
+✔️ Achieve High level of user experience\
+✔️ chat functionality\
+✔️ integrated with mapbox services\
+✔️ Best Filtering Technique 🏆\
+✔️ Fully integrated with backend and Authentication with jwt\
+✔️ Clean code and reusable and easy to maintain\
+✔️ Robust , Scalable and reliable app up to 100K property \
 
-A few resources to get you started if this is your first Flutter project:
+### The App
+you can installed via drive with this link  **[click here](https://drive.google.com/drive/folders/13y_tSIEy404VY4wVkIXvsy8QL5uS1Ft4)**.
+#### GIF Demo
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
