@@ -34,9 +34,9 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => Auth(),),
-        ChangeNotifierProxyProvider<Auth,Places>(create:(_)=>Places('','',[]) , update: (_, auth, previous) => Places(auth.token==null?'':auth.token!,auth.userId==null?'':auth.userId!,previous==null?[]:previous.places),),
-        ChangeNotifierProxyProvider<Auth,Favourite>(create:(_)=>Favourite('') , update: (_, auth, previous) => Favourite(auth.userId==null?'':auth.userId!),),
-        ChangeNotifierProxyProvider<Auth,Chat>(create:(_)=>Chat('') , update: (_, auth, previous) => Chat(auth.userId==null?'':auth.userId!),),
+        ChangeNotifierProxyProvider<Auth,Places>(create:(_)=>Places('',0) , update: (_, auth, previous) => Places(auth.token==null?'':auth.token!,auth.userId==null?0:auth.userId!),),
+        ChangeNotifierProxyProvider<Auth,Favourite>(create:(_)=>Favourite(0) , update: (_, auth, previous) => Favourite(auth.userId==null?0:auth.userId!),),
+        ChangeNotifierProxyProvider<Auth,Chat>(create:(_)=>Chat(0) , update: (_, auth, previous) => Chat(auth.userId==null?0:auth.userId!),),
 
 
         // ChangeNotifierProvider(create: (_) => Places()),

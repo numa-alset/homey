@@ -1,16 +1,20 @@
 
 import 'dart:io';
-// import 'package:dio/dio.dart';
+import 'package:dio/dio.dart';
+import 'package:homey/model/place.dart';
+import 'package:homey/provider/places.dart';
 import 'dart:convert';
 import 'package:homey/widgets/map_select.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 // import 'package:location/location.dart';
 import 'package:ripple_button/ripple_button.dart';
 import 'package:cool_stepper_reloaded/cool_stepper_reloaded.dart';
 import 'package:homey/widgets/circle_number.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ListYourPlace extends StatefulWidget {
   const ListYourPlace({super.key});
@@ -24,28 +28,40 @@ class _ListYourPlaceState extends State<ListYourPlace> {
   String? selectedRole = 'Writer';
   final TextEditingController _nameCtrl = TextEditingController();
   final TextEditingController _emailCtrl = TextEditingController();
-  Map<String, dynamic> _ListData = {
-    'type':'',
-    'name':'s',
-    'price': 0,
-    'priceMonthly': true,
-    'numBedroom':0,
-    'numBed':0,
-    'numBathroom':0,
-    'area':'',
-    'wifi':false,
-    'solarPower':false,
-    'furnished':false,
-    'garden':false,
-    'parking':false,
-    'swimmingpool':false,
-    'elevator':false,
-    'describe':'',
-    'images':<File>[],
-    'lan':0.2,
-    'lat':0.4,
+  int idUser=0;
+  bool isLoading=false;
+  bool isSubmitingImages=false;
+  int indexImage=0;
+  Map<String, String> _ListData = {
+    'idt':'',
+    'description':'s',
+    'price': '',
+    'area': '',
+    'site':'Homs',
+    'lan':'0.0',
+    'lat':'0.0',
+    'n_bathroom':'0',
+    'n_room':'0',
+    'type_r':'monthly',
+    'floor':'first',
+    'n_bed':'0',
+    'n_salon':'0',
+    'furntiure':'false',
+    'wifi':'false',
+    'garden':'false',
+    'pool':'false',
+    'elevator':'false',
+    'soloar_system':'false',
+    'owner':'',
+      'counter':'0',
+    'rate':'0',
+    'counters':'0',
+    'count':'0'
+
 
   };
+  List<String> _finalImages=[];
+  Map _finaldata={};
   // .............
   bool mounthly=true;
   // ...............
@@ -90,8 +106,39 @@ class _ListYourPlaceState extends State<ListYourPlace> {
   List<File> selectedImages = [];
 
 // ................
-  void _submit(){
-    Navigator.of(context).pop();
+ Future<void>  _submit()async{
+    var url=Uri.parse('https://dani2.pythonanywhere.com/properties/post/');
+    try{
+
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      String id=(json.decode(prefs.getString('userData')!)["userId"]).toString();
+      print('id'+id.toString());
+      _ListData["owner"]=id;
+      String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+      // final response =
+      print('we r sent');
+      print(_ListData);
+      final response =await http.post(url,headers: {'Cookie': cookie,
+        "Host":"dani2.pythonanywhere.com",
+        "Origin":"https://dani2.pythonanywhere.com",
+        "Referer":"https://dani2.pythonanywhere.com/properties/post/",
+        "X-Csrftoken":cookie.substring(10,42),
+      },
+          body: _ListData
+      );
+      print(response.body);
+      print('done');
+      print(json.decode(response.body));
+      _finaldata=json.decode(response.body);
+      idUser=json.decode(response.body)["id"];
+    }catch(e){print(e);
+    print('notdone');
+    }
+    setState(() {
+      isLoading=false;
+
+    });
+
 
   }
   @override
@@ -109,8 +156,8 @@ class _ListYourPlaceState extends State<ListYourPlace> {
 
                 child:
                   DropdownMenu(
-                    onSelected: (value) {_ListData['type']=value;
-                      print(_ListData['type']);
+                    onSelected: (value) {_ListData['idt']=value.toString();
+                      print(_ListData['idt']);
                       },
 
                     hintText: 'your type',
@@ -124,12 +171,12 @@ hintStyle: TextStyle(color: Colors.white),
 
 ),
                     dropdownMenuEntries: [
-              DropdownMenuEntry(value: 'home', label: 'home'),
-              DropdownMenuEntry(value: 'shop', label: 'shop'),
-              DropdownMenuEntry(value: 'lounge', label: 'lounge'),
-              DropdownMenuEntry(value: 'chalet', label: 'chalet'),
-              DropdownMenuEntry(value: 'villa', label: 'villa'),
-              DropdownMenuEntry(value: 'farm', label: 'farm')
+              DropdownMenuEntry(value: 'HO', label: 'Home'),
+              DropdownMenuEntry(value: 'SH', label: 'Shop'),
+              DropdownMenuEntry(value: 'LO', label: 'Lounge'),
+              DropdownMenuEntry(value: 'CH', label: 'Chalet'),
+              DropdownMenuEntry(value: 'VI', label: 'Villa'),
+              DropdownMenuEntry(value: 'FA', label: 'Farm')
                   ],
                   )
                 // TextSelectionToolbar(anchorAbove: Offset.infinite, anchorBelow: Offset.infinite,
@@ -159,11 +206,11 @@ hintStyle: TextStyle(color: Colors.white),
                   Navigator.of(context).push(MaterialPageRoute(builder: (context) => MapSelect(),)).then((value) {
                     _ListData['lat']=value[0];
                     _ListData['lan']=value[1];
-                    _ListData['name']=value[2];
+                    _ListData['site']=value[2];
                     setState(() {
                       isFinished=true;
                     });
-                    print(_ListData['name']);
+                    print(_ListData['site']);
                   });
 
                 },
@@ -200,9 +247,9 @@ hintStyle: TextStyle(color: Colors.white),
           ],
         ),
         validation: () {
-          if (_ListData['name']=='') {
-            return 'please add ur location';
-          }
+        //   if (_ListData['site']=='') {
+        //     return 'please add ur location';
+        //   }
           return null;
         },
 
@@ -223,7 +270,7 @@ hintStyle: TextStyle(color: Colors.white),
                   keyboardType: TextInputType.number,
                   onSubmitted: (value) {
                     setState(() {
-                      _ListData['price'] = value;
+                      _ListData['price'] = value.toString();
                     });
 
                   },
@@ -275,14 +322,14 @@ hintStyle: TextStyle(color: Colors.white),
                     if(index==1){setState(() {
                       mounthly=false;
                     }); }
-                    _ListData['priceMonthly']=mounthly;
+                    _ListData['type_r']=mounthly?'monthly':'daily';
                   },
                 ),
               ),
           ],
         ),
         validation: () {
-          if (_ListData['price']==0) {
+          if (_ListData['price']=='') {
             return 'add price';
           }
           return null;
@@ -339,7 +386,7 @@ hintStyle: TextStyle(color: Colors.white),
                   onPressed: (index) {
                     setState(() {
                       numBedroom=index;
-                      _ListData['numBedroom']=numBedroom;
+                      _ListData['n_room']=numBedroom.toString();
                     });
                   },
 
@@ -378,7 +425,7 @@ hintStyle: TextStyle(color: Colors.white),
                 onPressed: (index) {
                   setState(() {
                     numSalon=index;
-                    _ListData['numSalon']=numSalon;
+                    _ListData['n_salon']=numSalon.toString();
                   });
                 },
 
@@ -417,7 +464,7 @@ hintStyle: TextStyle(color: Colors.white),
                   onPressed: (index) {
                     setState(() {
                       numBed=index;
-                      _ListData['numBed']=numBed;
+                      _ListData['n_bed']=numBed.toString();
                     });
                   },
 
@@ -456,7 +503,7 @@ hintStyle: TextStyle(color: Colors.white),
                   onPressed: (index) {
                     setState(() {
                       numBathroom=index;
-                      _ListData['numBathroom']=numBathroom;
+                      _ListData['n_bathroom']=numBathroom.toString();
                     });
                   },
 
@@ -465,25 +512,57 @@ hintStyle: TextStyle(color: Colors.white),
       ),
       CoolStep(
         title: 'how big is it?',
-          subtitle: 'add your place area ',
-          content: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: TextField(
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
-                    label: Text('the Area of your place',style: TextStyle(color: Colors.white),),
-                  ),
-                  keyboardType: TextInputType.number,
-                  onSubmitted: (value) {
-                    setState(() {
-                      _ListData['area'] = value;
-                    });
+          subtitle: 'add your place area and in which floor',
+          content: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextField(
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+                        label: Text('the Area of your place',style: TextStyle(color: Colors.white),),
+                      ),
+                      keyboardType: TextInputType.number,
+                      onSubmitted: (value) {
+                        setState(() {
+                          _ListData['area'] = value.toString();
+                        });
 
-                  },
-                ),
+                      },
+                    ),
+              ),
+    Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8.0),
+
+    child:
+    DropdownMenu(
+    onSelected: (value) {_ListData['floor']=value.toString();
+    print(_ListData['floor']);
+    },
+
+    hintText: 'The Floor',
+    width: MediaQuery.of(context).size.width*0.8,
+    inputDecorationTheme:
+
+    InputDecorationTheme(
+    labelStyle: TextStyle(color: Colors.white),
+    hintStyle: TextStyle(color: Colors.white),
+    border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
+
+    ),
+    dropdownMenuEntries: [
+    DropdownMenuEntry(value: 'first', label: 'First'),
+    DropdownMenuEntry(value: 'second', label: 'Second'),
+    DropdownMenuEntry(value: 'third', label: 'Third'),
+    DropdownMenuEntry(value: 'fourth', label: 'Fourth'),
+    DropdownMenuEntry(value: 'fifth', label: 'Fifth'),
+    DropdownMenuEntry(value: 'more than fifth', label: 'in the sky')
+    ],
+    ),)
+            ],
           ),
         validation: () {
-          if(_ListData['area']=='')return 'add place';
+          if(_ListData['area']==0)return 'add place';
           return null;
         },
       ),
@@ -506,7 +585,7 @@ hintStyle: TextStyle(color: Colors.white),
                   ),
                   Checkbox(value: wifi, onChanged: (value) => setState(() {
                     wifi=value!;
-                    _ListData['wifi']=wifi;
+                    _ListData['wifi']=wifi.toString();
                   }),),
                 ],
               ),
@@ -524,7 +603,7 @@ hintStyle: TextStyle(color: Colors.white),
                   ),
                   Checkbox(value:solarPower, onChanged: (value) => setState(() {
                     solarPower=value!;
-                    _ListData['solarPower']=solarPower;
+                    _ListData['soloar_system']=solarPower.toString();
                   }),),
                 ],
               ),
@@ -542,7 +621,7 @@ hintStyle: TextStyle(color: Colors.white),
                   ),
                   Checkbox(value: parking, onChanged: (value) => setState(() {
                     parking=value!;
-                    _ListData['parking']=parking;
+                    // _ListData['parking']=parking;
                   }),),
                 ],
               ),
@@ -560,7 +639,7 @@ hintStyle: TextStyle(color: Colors.white),
                   ),
                   Checkbox(value: swimmingpool, onChanged: (value) => setState(() {
                     swimmingpool=value!;
-                    _ListData['swimmingpool']=swimmingpool;
+                    _ListData['pool']=swimmingpool.toString();
                   }),),
                 ],
               ),
@@ -578,7 +657,7 @@ hintStyle: TextStyle(color: Colors.white),
                   ),
                   Checkbox(value: garden, onChanged: (value) => setState(() {
                     garden=value!;
-                    _ListData['garden']=garden;
+                    _ListData['garden']=garden.toString();
                   }),),
                 ],
               ),
@@ -596,7 +675,7 @@ hintStyle: TextStyle(color: Colors.white),
                   ),
                   Checkbox(value: furnished, onChanged: (value) => setState(() {
                     furnished=value!;
-                    _ListData['furnished']=furnished;
+                    _ListData['furntiure']=furnished.toString();
                   }),),
                 ],
               ),
@@ -614,7 +693,7 @@ hintStyle: TextStyle(color: Colors.white),
                   ),
                   Checkbox(value: elevator, onChanged: (value) => setState(() {
                     elevator=value!;
-                    _ListData['elevator']=elevator;
+                    _ListData['elevator']=elevator.toString();
                   }),),
                 ],
               ),
@@ -631,15 +710,24 @@ hintStyle: TextStyle(color: Colors.white),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
                     label: Text('Describe yor place',style: TextStyle(color: Colors.white),),
                   ),
-                  onSubmitted: (value) {setState(() {
-                    _ListData['describe'] = value;
+                  onSubmitted: (value)async {setState(() {
+                    _ListData['description'] = value.toString();
+                    isLoading=true;
                   });
-
+                   await _submit();
+                    // Future.delayed(Duration(seconds: 3),() {
+                    //   setState(() {
+                    //     isLoading=false;
+                    //   });
+                    // },);
                   },
                 ),
           ),
         validation: () {
-          if(_ListData['describe']=='')return 'add desc';
+          print(idUser);
+          print(_ListData);
+          if(_ListData['description']=='')return 'add desc';
+          // Future.delayed(Duration(seconds: 3)).then((value) => null);
           return null;
         },
       ),
@@ -696,6 +784,38 @@ hintStyle: TextStyle(color: Colors.white),
     ];
 
     void _onFinish() async{
+      // print(http.MultipartFile.fromPath('image', selectedImages[0].path));
+      // print(selectedImages[0].absolute);
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      String token=json.decode(prefs.getString('userData')!)["token"];
+      String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+      setState(() {
+        isSubmitingImages=true;
+      });
+        // var request = http.MultipartRequest('POST', Uri.parse('https://dani2.pythonanywhere.com/images'));
+        // request.headers.addAll({'Cookie': cookie,
+        //   "Host":"dani2.pythonanywhere.com",
+        //   "Origin":"https://dani2.pythonanywhere.com",
+        //   "Referer":"https://dani2.pythonanywhere.com/images/",
+        //   "X-Csrftoken":cookie.substring(10,42),
+        // });
+        // request.fields.addAll({"pid":"$idUser"});
+        // request.files.add(await http.MultipartFile.fromPath('image', selectedImages[0].path));
+// try{
+//         // var response = await request.send();
+//   final response=await http.post(Uri.parse('https://dani2.pythonanywhere.com/images'),
+//       headers: {'Cookie': cookie,
+//         "Host":"dani2.pythonanywhere.com",
+//         "Origin":"https://dani2.pythonanywhere.com",
+//         "Referer":"https://dani2.pythonanywhere.com/images/",
+//         // "X-Csrftoken":cookie.substring(10,42),
+//       },
+//   body: {
+//     "pid":"3",
+//     "image":http.MultipartFile.fromPath('image', selectedImages[0].path)
+//   }
+//   );
+//         print(response.body);}catch(e){print(e);}
       // Uri url = Uri.parse('http://a/create_sale_post');
       // var request = http.MultipartRequest('POST', url);
       //
@@ -707,19 +827,97 @@ hintStyle: TextStyle(color: Colors.white),
       //   print(image);
       //   request.files.add(image);
       // }
-      // request.fields["Title"] = title;
-      // request.fields["Description"] = description;
-      // request.fields["City"] = city;
-      // request.fields["Species"] = species;
-      // request.fields["Price"] = price;
-      // request.fields["Sex"] = sex;
-      // request.fields["Years"] = ageYears;
-      // request.fields["Months"] = ageMonths;
-      // request.fields["Breed"] = breed;
-      // request.headers['Content-Type'] = 'multipart/form-data';
-      // request.headers['token'] = 'multipart/form-data';
+
       //
       // var response = await request.send();
+      // dioooo
+
+      for (var i = 0; i < selectedImages.length; i++) {
+        setState(() {
+          indexImage=i+1;
+        });
+        var formData = FormData.fromMap({
+          "pid": '10',
+          "image": await MultipartFile.fromFile(selectedImages[i].path),
+        });
+        //http
+        // var request = http.MultipartRequest('POST', Uri.parse('https://dani2.pythonanywhere.com/images/'));
+        //   request.fields["pid"]=idUser.toString();
+        //   request.files.add(http.MultipartFile.fromBytes('image', File(selectedImages[i].path).readAsBytesSync(),filename:selectedImages[i].path.split('/').last ));
+        // var res = await request.send();
+        // print(res.stream.last);
+        // print(res.contentLength);
+        // print(res.headers);
+        // print(res.headersSplitValues);
+        // print(res.reasonPhrase);
+        // print(res);
+
+        //dio
+        Dio dio = Dio();
+        try {
+          print(formData);
+          var response = await dio.post(
+            'https://dani2.pythonanywhere.com/images/', data: formData,
+            options: Options(headers: {
+              "Content-Type": 'multipart/form-data',
+              'Cookie': cookie,
+              "Host": "dani2.pythonanywhere.com",
+              "Origin": "https://dani2.pythonanywhere.com",
+              "Referer": "https://dani2.pythonanywhere.com/images/",
+              "X-Csrftoken": cookie.substring(10, 42),
+            }, receiveDataWhenStatusError: true,),
+          );
+          print(response.data);
+          // print(response.statusCode);
+
+          // filename:
+          // print(selectedImages[0].path
+          //     .split('/')
+          //     .last);
+          // print(response.extra);
+          // print(response.statusMessage);
+          // print(response);
+          _finalImages.add('https://dani2.pythonanywhere.com'+response.data["image"].toString());
+        } catch (e) {
+          print(e);
+        }
+      }
+      // //third
+      // var request = http.MultipartRequest(
+      //   'POST',
+      //   Uri.parse('https://dani2.pythonanywhere.com/images/'),
+      // );
+      // Map<String, String> headers = {"Content-type": "multipart/form-data",'Cookie': cookie,
+      //     "Host":"dani2.pythonanywhere.com",
+      //     "Origin":"https://dani2.pythonanywhere.com",
+      //     "Referer":"https://dani2.pythonanywhere.com/images/",
+      //   "X-Csrftoken":cookie.substring(10,42),
+      // };
+      // request.files.add(
+      //   http.MultipartFile(
+      //     'image',
+      //     selectedImages[0].readAsBytes().asStream(),
+      //     selectedImages[0].lengthSync(),
+      //     filename: selectedImages[0].path.split('/').last,
+      //   ),
+      // );
+      // request.fields.addAll({"pid":"3"});
+      // request.headers.addAll(headers);
+      // print("request: " + request.toString());
+      // var res = await request.send();
+      // print(res.stream);
+      // http.Response response = await http.Response.fromStream(res);
+      // print(response.body);
+
+
+      //
+      await Provider.of<Places>(context,listen: false).addProduct({..._finaldata,...{"image":_finalImages}});
+      // print(_finaldata);
+      // final place=Place(id: idUser, counter: _finaldata["counter"], owner: _finaldata["owner"], site: _finaldata["site"], description: _finaldata["description"], floor: _finaldata["floor"], idt: _finaldata["idt"], area: _finaldata["area"], n_salon: _finaldata["n_salon"], image: _finalImages, price: _finaldata["price"], n_bathroom:_finaldata["n_bathroom"] , n_bed: _finaldata["n_bed"], n_room: _finaldata["n_room"], elevator: _finaldata["elevator"], furntiure: _finaldata["furntiure"], garden: _finaldata["garden"], parking: _finaldata["parking"], type_r: _finaldata["type_r"], soloar_system: _finaldata["soloar_system"], pool: _finaldata["pool"], wifi: _finaldata["wifi"], rating: _finaldata["rating"], lan: _finaldata["lan"], lat: _finaldata["lat"], ratestate: _finaldata["ratestate"]);
+      // print(place);
+      setState(() {
+        isSubmitingImages=false;
+      });
       final flush =  Flushbar(
         message: 'Steps completed!',
         flushbarStyle: FlushbarStyle.FLOATING,
@@ -730,11 +928,14 @@ hintStyle: TextStyle(color: Colors.white),
           size: 28.0,
           color: Colors.green,
         ),
-        duration: Duration(milliseconds: 1400),
+        duration: Duration(milliseconds: 3400),
         leftBarIndicatorColor: Colors.green,
       );
-      await flush.show(context).then((value)  {print(_ListData);
-          Navigator.of(context).popAndPushNamed('./yourPlaces');});
+      await flush.show(context).then((value)  {
+        print(_ListData);
+        // _submit();
+          Navigator.of(context).popAndPushNamed('./yourPlaces');
+      });
 
 
     }
@@ -750,7 +951,12 @@ hintStyle: TextStyle(color: Colors.white),
         stepColor:Color.fromRGBO(34, 40, 49, 1),
         headerColor: Color.fromRGBO(34, 40, 49, 1),
 
-        finishButton: Container(
+        finishButton:isSubmitingImages?Expanded(child: Row(
+          children: [
+            Text('$indexImage/${selectedImages.length}'),
+            CircularProgressIndicator()
+          ],
+        )) :Container(
           child: RippleButton(
              'Finish',
             type: RippleButtonType.AMBER,
@@ -760,7 +966,7 @@ hintStyle: TextStyle(color: Colors.white),
 
             ),
             onPressed: () => {
-               _submit()
+               // _submit()
             },
           ),
         ),
@@ -775,7 +981,7 @@ hintStyle: TextStyle(color: Colors.white),
           ),
           onPressed: () => {},
         ),
-        nextButton: RippleButton(
+        nextButton: isLoading?CircularProgressIndicator():RippleButton(
            'Next',
 color: RippleButtonColor(background: Color.fromRGBO(0, 173, 181, 1),foreground: Colors.white),
           border: RippleButtonBorder(radius: BorderRadius.circular(20)),
@@ -886,6 +1092,7 @@ color: RippleButtonColor(background: Color.fromRGBO(0, 173, 181, 1),foreground: 
             ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Nothing is selected')));
           }
+          print(selectedImages);
         },
       );
 

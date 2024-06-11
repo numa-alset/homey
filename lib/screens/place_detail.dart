@@ -1,9 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_carousel_slider/flutter_custom_carousel_slider.dart';
+import 'package:homey/provider/auth.dart';
 import 'package:homey/provider/chat.dart';
 import 'package:homey/provider/favorite.dart';
+import 'package:homey/screens/owner_places.dart';
 import 'package:homey/widgets/circle_number.dart';
+import 'package:homey/widgets/comments.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/map2.dart'as map2;
 import 'package:homey/provider/places.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +23,10 @@ class PlaceDetail extends StatefulWidget {
 class _PlaceDetailState extends State<PlaceDetail> {
 
 
+
+
+
+
  List <CarouselItem> crItem(List image){
    List<CarouselItem> listee=[];
     for(int i=0;i<image.length;i++){
@@ -27,6 +36,13 @@ class _PlaceDetailState extends State<PlaceDetail> {
    //  return image.forEach((element) {CarouselItem(image: NetworkImage(image[element]));})as List<CarouselItem>;
  }bool isLodaing=false;
  final _controlerTex=TextEditingController();String commentValue='';
+
+@override
+  void initState() {
+    // TODO: implement initState
+  Provider.of<Places>(context,listen: false).fetchAndSetComments();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
 
@@ -34,15 +50,32 @@ class _PlaceDetailState extends State<PlaceDetail> {
     var args=ModalRoute.of(context)!.settings.arguments as List;
    final int id=args[0];
    final List image=args[1];
-   final bool update=true;
+   final bool update=args[2];
    //args[2];
 
 
     // print(args);
     final place= Provider.of<Places>(context).findById(id);
     final chat=Provider.of<Chat>(context);
+    final comments=Provider.of<Places>(context).getComments(id);
+    var Images= Provider.of<Chat>(context).Images;
+    Future<String>setimage()async{
+      final prefs = await SharedPreferences.getInstance();
+      var id=json.decode(prefs.getString('userData')!)["userId"];
+      // var url2=Uri.parse('https://dani2.pythonanywhere.com/images/profileimg');
+      // final response2 = await http.get(url2);
+      // final extractedData2 = json.decode(response2.body) as List;
+      return Images.firstWhere((element) => element['cid'].toString()==id.toString())["image"].toString();
+    }
    Future<void> goToChat()async{
-
+      setState(() {
+        isLodaing=true;
+      });
+    await Provider.of<Chat>(context,listen: false).startMessage(place.owner);
+      setState(() {
+        isLodaing=false;
+      });
+    Navigator.of(context).popAndPushNamed("./tabScreen",arguments: 2);
     }
     TextEditingController DescriptionController = new TextEditingController();
     int numBedroom=place.n_room;
@@ -64,7 +97,7 @@ class _PlaceDetailState extends State<PlaceDetail> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             Text('\$${place.price} ${place.type_r==2?'Day':'Month'}', style: TextStyle18) ,
-           isLodaing? CircularProgressIndicator():ElevatedButton(onPressed: () {
+           isLodaing? CircularProgressIndicator():update?Text('your place', textAlign: TextAlign.center, style: TextStyle18):ElevatedButton(onPressed: () {
               goToChat();
             },
              child: Text('Send message', textAlign: TextAlign.center, style: TextStyle18),
@@ -111,7 +144,7 @@ class _PlaceDetailState extends State<PlaceDetail> {
             title: Text(
               place.site, style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 24, fontFamily: 'Lato', fontWeight: FontWeight.w600,),
             ),
-            subtitle: Text(place.rating.toString(), style: TextStyle15,),
+            subtitle: Text('Rate ${place.rating}', style: TextStyle15,),
             trailing: isLodaing?CircularProgressIndicator() :Container(width: MediaQuery.of(context).size.width*0.3,
               child:ElevatedButton(
                   style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Color(0xFF00ADB5))),
@@ -139,7 +172,7 @@ class _PlaceDetailState extends State<PlaceDetail> {
           // Place Description
           // !update?
           Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Text('${place.description}',softWrap: true,maxLines: 2, style: TextStyle15,),),
-              Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
+             update? Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
               child: TextField(controller:DescriptionController ,
 
               decoration: InputDecoration(
@@ -151,8 +184,25 @@ class _PlaceDetailState extends State<PlaceDetail> {
               ),
                 onSubmitted: (value) => place.description=value,
               ),
-              ),
+              ):SizedBox(),
 
+          // Divider
+          !update? Padding(padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10), child: Divider(),):SizedBox(),
+
+          // PLaces relative to owner
+         !update? Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Text('PLaces relative to owner', style: TextStyle20),):SizedBox(),
+
+         !update?
+             ListTile(
+               onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context) => OwnerPlaces(place.owner),));
+               },
+               trailing: Icon(Icons.arrow_forward_ios_sharp,color: Colors.white,),
+               leading: CircleAvatar(backgroundImage: NetworkImage('https://dani2.pythonanywhere.com'+Images.firstWhere((element) => element["cid"].toString()==place.owner.toString())["image"].toString()??'')),
+
+               title: Text('see all places for the same owner',style: TextStyle15,),
+             )
+             :SizedBox(),
           // Divider
           Padding(padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10), child: Divider(),),
 
@@ -240,33 +290,47 @@ class _PlaceDetailState extends State<PlaceDetail> {
           Padding(padding: EdgeInsets.symmetric(horizontal: 20),child: Text('Rating & reviews:', style: TextStyle20),),
 
          update? SizedBox():ListTile(
-          leading: CircleAvatar(child: Text(place.site.substring(0,1)),),
-            title: TextField(
+          leading: FutureBuilder(
+              future:setimage(),
+              builder:(context, snapshot) =>
+              snapshot.hasData?
+    CircleAvatar(backgroundImage: NetworkImage('https://dani2.pythonanywhere.com'+snapshot.data.toString()))
+
+    // Image.network('https://dani2.pythonanywhere.com'+snapshot.data.toString(),)
+              // NetworkImage('https://dani2.pythonanywhere.com'+snapshot.data.toString())
+                  : CircleAvatar(child: Text('s'),)
+
+          ),
+           title: TextField(
 
               controller: _controlerTex,
               onChanged: (value) => setState(() {
                 commentValue=value;
               }),
             ),
-            trailing: ElevatedButton(onPressed: () {
+            trailing: ElevatedButton(onPressed: ()async {
               print(commentValue);
+              FocusScope.of(context).unfocus();
+            await  Provider.of<Places>(context,listen: false).addComment( id.toString(), commentValue);
               setState(() {
                 _controlerTex.clear();
+
               });
             }, child: Text('comment',style: TextStyle(color: Colors.white),),
             style: ButtonStyle(backgroundColor: MaterialStatePropertyAll(Color(0xFF00ADB5))),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+            padding: EdgeInsets.zero,
+            // EdgeInsets.symmetric(horizontal: 20,vertical: 10),
             child: Container(height: 200,
-              child: ListView(
-                children: [
-                  Text('Future Builder for comments'),
-                  Text('Future Builder for comments'),
-                  Text('Future Builder for comments'),
-                  Text('Future Builder for comments'),
-                ],
+              child: FutureBuilder(
+                future: Provider.of<Places>(context).fetchAndSetComments(),
+                builder: (context, snapshot) => ListView.builder(
+                  itemCount: comments.length,
+                  itemBuilder: (context, index) => Comments(id: comments[index].id, date_time: comments[index].date_time.substring(0,10), comments: comments[index].comments, idc: comments[index].idc, idp: comments[index].idp,isMe: Provider.of<Auth>(context).userId==place.owner,),
+
+                ) ,
               ),
             ),
           )

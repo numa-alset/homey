@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:homey/logo/app_logo.dart';
+import 'package:homey/provider/chat.dart';
+import 'package:homey/provider/favorite.dart';
 import 'package:homey/provider/places.dart';
 import 'package:provider/provider.dart';
 
@@ -17,8 +19,11 @@ class _SplashState extends State<Splash> {
   void initState() {
     // TODO: implement initState
     Provider.of<Places>(context,listen: false).fetchAndSetProduct().then((value) {
-      // Provider.of<Favourite>(context,listen: false).fetchAndSetFav();
-     Navigator.of(context).pushReplacementNamed('./tabScreen');
+      // Provider.of<Favourite>(context,listen: false).fetchAndSetFav().then((value) =>
+        Provider.of<Chat>(context,listen: false).setImages().then((value) =>  Navigator.of(context).pushReplacementNamed('./tabScreen'))
+      ;
+      // );
+     
     });
     super.initState();
   }

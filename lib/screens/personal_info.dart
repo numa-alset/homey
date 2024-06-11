@@ -5,22 +5,34 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart' as syspaths;
 import 'package:provider/provider.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 class PersonalInfo extends StatefulWidget {
+
 
   @override
   State<PersonalInfo> createState() => _PersonalInfoState();
 }
 class _PersonalInfoState extends State<PersonalInfo> {
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    setValues();
+    super.initState();
+  }
   bool legalnameread=true;
   bool genderRead=true;
   bool phoneRead=true;
   bool emailRead=true;
-  String initialLegalName='miechel';
-  String initialGender='male';
-  String initialPhone='9845234';
-  String initialEmail='miechel@gmail.com';
+ late String initialLegalName;
+ late String initialGender;
+ late String initialPhone;
+ late String initialEmail;
+
+ bool isLoading =false;
 
   // image
 
@@ -30,15 +42,89 @@ class _PersonalInfoState extends State<PersonalInfo> {
     final imageFile= await picker.pickImage(source: ImageSource.camera,maxWidth: 600);
     setState(() {
       _storedImage=File(imageFile!.path);
-      print(imageFile!.path);Provider.of<Chat>(context,listen: false).setPic=_storedImage!;
+      print(imageFile.path);Provider.of<Chat>(context,listen: false).setPic=_storedImage!;
     });
     final appDir=await syspaths.getApplicationDocumentsDirectory();
     final fileName= path.basename(imageFile!.path);
-    final savedImage= await File(imageFile!.path).copy('${appDir.path}/$fileName');
-
+    final savedImage= await File(imageFile.path).copy('${appDir.path}/$fileName');
+    final prefs = await SharedPreferences.getInstance();
+       // upload image
   }
 
-  //...............
+  Future<String>setimage()async{
+    final prefs = await SharedPreferences.getInstance();
+    var id=json.decode(prefs.getString('userData')!)["userId"];
+    var url2=Uri.parse('https://dani2.pythonanywhere.com/images/profileimg');
+    final response2 = await http.get(url2);
+    final extractedData2 = json.decode(response2.body) as List;
+    return extractedData2.firstWhere((element) => element['cid'].toString()==id.toString())["image"].toString();
+  }
+
+  Future<void> editUserName(String value ) async {
+    final prefs = await SharedPreferences.getInstance();
+    var  userData = json.decode(prefs.getString('userData')!); // Get existing or create empty map
+print(userData);
+    userData['name'] = value; // Update the 'name' value
+    // userData['phone'] = initialPhone; // Update the 'name' value
+    // userData['email'] = initialEmail; // Update the 'name' value
+    //   print(userData);
+    // Save the updated map back to shared preferences
+    await prefs.setString('userData', json.encode(userData));
+  }
+  Future<void> editUserPhone(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    var  userData = json.decode(prefs.getString('userData')!); // Get existing or create empty map
+// print(userData);
+//     userData['name'] = initialLegalName; // Update the 'name' value
+    userData['phone'] = value; // Update the 'name' value
+    // userData['email'] = initialEmail; // Update the 'name' value
+    //   print(userData);
+    // // Save the updated map back to shared preferences
+    await prefs.setString('userData', json.encode(userData));
+  }
+  Future<void> editUserEmail(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    var  userData = json.decode(prefs.getString('userData')!); // Get existing or create empty map
+// print(userData);
+    // userData['name'] = initialLegalName; // Update the 'name' value
+    // userData['phone'] = initialPhone; // Update the 'name' value
+    userData['email'] = value; // Update the 'name' value
+      // print(userData);
+    // Save the updated map back to shared preferences
+    await prefs.setString('userData', json.encode(userData));
+  }
+    Future<void> editUserGender(String value) async {
+    final prefs = await SharedPreferences.getInstance();
+    var  userData = json.decode(prefs.getString('userData')!); // Get existing or create empty map
+print(userData);
+    // userData['name'] = initialLegalName; // Update the 'name' value
+    // userData['phone'] = initialPhone; // Update the 'name' value
+    // userData['email'] = value; // Update the 'name' value
+    userData['gender'] = value; // Update the 'name' value
+      // print(userData);
+    // Save the updated map back to shared preferences
+    await prefs.setString('userData', json.encode(userData));
+  }
+
+  //..........set values
+  Future<void>setValues()async{
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      initialLegalName= json.decode(prefs.getString('userData')!)["name"].toString();
+      initialPhone= json.decode(prefs.getString('userData')!)["phone"].toString();
+      initialEmail= json.decode(prefs.getString('userData')!)["email"].toString();
+      initialGender =json.decode(prefs.getString('userData')!)["gender"].toString();;
+    });
+
+
+    // var url2=Uri.parse('https://dani2.pythonanywhere.com/images/profileimg');
+    // final response2 = await http.get(url2);
+    // final extractedData2 = json.decode(response2.body) as List;
+    // return extractedData2.firstWhere((element) => element['cid'].toString()==id.toString())["image"].toString();
+  }
+
+  //..........
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,10 +149,19 @@ foregroundColor: Colors.white,
               decoration: BoxDecoration(shape: BoxShape.circle,border: Border.all(color: Colors.white),color: Colors.white10),
                   clipBehavior: Clip.antiAlias,
             alignment: Alignment.center,
-            child:  Provider.of<Chat>(context).pic !=null?
-            Image.file( Provider.of<Chat>(context).pic!,fit: BoxFit.cover,width: double.infinity,)
-                :
-                Text('no image yet',)
+            child: FutureBuilder(
+                future:setimage(),
+                builder:(context, snapshot) =>
+                snapshot.hasData?
+                    Image.network('https://dani2.pythonanywhere.com'+snapshot.data.toString(),fit:BoxFit.cover ,)
+                 // NetworkImage('https://dani2.pythonanywhere.com'+snapshot.data.toString())
+                    : Text('no image yet')
+
+            ),
+            // Provider.of<Chat>(context).pic !=null?
+            // Image.file( Provider.of<Chat>(context).pic!,fit: BoxFit.cover,width: double.infinity,)
+            //     :
+            //     Text('no image yet',)
             // Image.asset('assets/images/product-placeholder.png',fit:  BoxFit.cover, ),
           ),
             TextButton.icon(onPressed: () {
@@ -74,10 +169,14 @@ foregroundColor: Colors.white,
             }, label: Text('add pic',style: TextStyle(color: Colors.white,decoration: TextDecoration.underline,decorationColor: Colors.white),),
             icon: Icon(Icons.camera,color: Colors.white,),
             ),
-            TextFormFieldBuilder(legalnameread,initialLegalName , TextInputType.text, 'Legal name'),
-            TextFormFieldBuilder(genderRead, initialGender, TextInputType.text, 'Gender'),
-            TextFormFieldBuilder(phoneRead, initialPhone, TextInputType.number, 'Phone number'),
-            TextFormFieldBuilder(emailRead, initialEmail, TextInputType.emailAddress,'Email'),
+            TextField(
+
+            ),
+
+            TextFormFieldBuilder(legalnameread,initialLegalName , TextInputType.text, 'Legal name',editUserName),
+            TextFormFieldBuilder(genderRead, initialGender, TextInputType.text, 'Gender',editUserGender),
+            TextFormFieldBuilder(phoneRead, initialPhone, TextInputType.number, 'Phone number',editUserPhone),
+            TextFormFieldBuilder(emailRead, initialEmail, TextInputType.emailAddress,'Email',editUserEmail),
              // Padding(
              //   padding: const EdgeInsets.only(top: 20),
              //   child: Row(
@@ -105,11 +204,14 @@ foregroundColor: Colors.white,
           ],
         ),
       ),
+      floatingActionButton: isLoading?CircularProgressIndicator():null,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
-    TextFormFieldBuilder( legal,String inital,TextInputType type,String label) {
+    TextFormFieldBuilder( legal,String inital,TextInputType type,String label,Function setValue) {
+
     return TextFormField(
-      initialValue: inital,
+      initialValue:inital,
       style: TextStyle(
         color: Color(0xEEEEEEEE),
         fontSize: 15,
@@ -144,16 +246,23 @@ foregroundColor: Colors.white,
         ),
 
       ),
+
       keyboardType: type,
-      onFieldSubmitted: (value) {
+      onFieldSubmitted: (value) async{
         // legal = !legal;
-        print(value);
+        // print(value);
+        setState(() {
+          isLoading=true;
+        });
+       await setValue(value);
         setState(() {
           legalnameread=!legal;
+          isLoading=false;
           // Widget.canUpdate(oldWidget, newWidget)legal = !legal;
         });
       },
       readOnly: legalnameread,
+
 
     );
     }

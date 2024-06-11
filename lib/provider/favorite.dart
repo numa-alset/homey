@@ -1,58 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:shared_preferences/shared_preferences.dart';
 class Favourite with ChangeNotifier{
 
-final String userId;
+final int userId;
 Favourite(this.userId);
 
-List fav=[1,2];
+List fav=[];
 get Fav{return [...fav];}
 get length {return fav.length;}
 Future<void> addFav (int id)async{
-  var url=Uri.parse('');
-  // try{
-  //   final response= await http.post(url,body:json.encode({
-  //     'userId':userId,
-  //     'placeid':id
-  //   }) ,);
-  //   print(json.decode(response.body));
-  //   _fav.add(id);
-  //   notifyListeners();
-  // }
-  // catch (erorr){
-  //   _fav.add(id);
-  //   notifyListeners();
-  //   print(erorr);
-  //   throw erorr;
-  // }
-  print(id);
+  var url=Uri.parse('https://dani2.pythonanywhere.com/Favorites/'+userId.toString());
   fav.add(id);
   notifyListeners();
+  try{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token=json.decode(prefs.getString('userData')!)["token"];
+    String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+
+    final response= await http.post(url,headers: {'Cookie': cookie,
+    "Host":"dani2.pythonanywhere.com",
+    "Origin":"https://dani2.pythonanywhere.com",
+    "Referer":"https://dani2.pythonanywhere.com/start/$userId",
+    "X-Csrftoken":cookie.substring(10,42),
+    },body:{
+      "idp":"$id","idc":"$userId"
+    } ,);
+    print(json.decode(response.body));
+  }
+  catch (erorr){
+    fav.remove(id);
+    notifyListeners();
+    print(erorr);
+    throw erorr;
+  }
 }
 Future<void>deleteFav(int id)async{
-  var url=Uri.parse('');
-  // try{
-  //   final response= await http.post(url,body:json.encode({
-  //     'userId':userId,
-  //     'placeid':id
-  //   }) ,);
-  //   print(json.decode(response.body));
-  //   _fav.remove(id);
-  //   notifyListeners();
-  // }
-  // catch (erorr){
-  //   _fav.remove(id);
-  //   notifyListeners();
-  //   print(erorr);
-  //   throw erorr;
-  // }
+  var url=Uri.parse('https://dani2.pythonanywhere.com/Favorites/'+userId.toString());
   fav.remove(id);
   notifyListeners();
+  try{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String token=json.decode(prefs.getString('userData')!)["token"];
+    String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+
+    final response= await http.post(url,headers: {'Cookie': cookie,
+      "Host":"dani2.pythonanywhere.com",
+      "Origin":"https://dani2.pythonanywhere.com",
+      "Referer":"https://dani2.pythonanywhere.com/start/$userId",
+      "X-Csrftoken":cookie.substring(10,42),
+    },body:{
+      "idp":"$id","idc":"$userId"
+    });
+    print(json.decode(response.body));
+
+  }
+  catch (erorr){
+    fav.add(id);
+    notifyListeners();
+    print(erorr);
+    throw erorr;
+  }
 
 }
 Future<void>fetchAndSetFav()async{
-  var url=Uri.parse('https://my.api.mockaroo.com/test.json?key=2a7b2620');
+  print(userId);
+  var url=Uri.parse('https://dani2.pythonanywhere.com/Favorites/'+userId.toString());
   final response= await http.get(url);
   final extractedData= json.decode(response.body) as List;
 
@@ -61,8 +76,9 @@ Future<void>fetchAndSetFav()async{
     return;
   }
   extractedData.forEach((value) {
-    loadedProducts.add(value['id']);
+    loadedProducts.add(value['idp']);
   });
+  print(loadedProducts);
   fav=loadedProducts;
   notifyListeners();
   // print('done');

@@ -22,6 +22,10 @@ class Place{
   int rating;
   int counter;
   int owner;
+  double lan;
+  double lat;
+  bool ratestate;
+
   Place({
     required this.id,
     required this.counter,
@@ -46,6 +50,9 @@ class Place{
     required this.pool,
     required this.wifi,
     required this.rating,
+    required this.lan,
+    required this.lat,
+    required this.ratestate,
 });
 
 }

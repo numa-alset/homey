@@ -1,31 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_carousel_slider/flutter_custom_carousel_slider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../model/place.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 class Places with ChangeNotifier{
 
-var placess;
-  List<Place>_places=[
-    // Place(id: 1 , name: 'place1', type: 'home', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 170, bathrooms:1, beds: 1, bedrooms: 1, elevator: false, furnished: false, garden: false, parking: false, priceType: true, solarPower: false, swimmingPool: false, wifi: false,rate: 1),
-    // Place(id: 2 , name: 'place2', type: 'home', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 110, bathrooms:1, beds: 1, bedrooms: 1, elevator: false, furnished: false, garden: false, parking: false, priceType: true, solarPower: true, swimmingPool: true, wifi: false,rate: 1),
-    // Place(id: 3 , name: 'place3', type: 'villa', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 11, bathrooms:1, beds: 1, bedrooms: 1, elevator: false, furnished: false, garden: false, parking: true, priceType: false, solarPower: false, swimmingPool: false, wifi: true,rate: 1),
-    // Place(id: 4 , name: 'place5', type: 'home', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 120, bathrooms:1, beds: 1, bedrooms: 1, elevator: false, furnished: false, garden: false, parking: true, priceType: true, solarPower: true, swimmingPool: true, wifi: false,rate: 1),
-    // Place(id: 5 , name: 'place5', type: 'shop', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 17, bathrooms:1, beds: 1, bedrooms: 1, elevator: false, furnished: true, garden: false, parking: false, priceType: false, solarPower: false, swimmingPool: false, wifi: true,rate: 5),
-    // Place(id: 6 , name: 'place6', type: 'home', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 103, bathrooms:1, beds: 1, bedrooms: 1, elevator: false, furnished: true, garden: false, parking: false, priceType: true, solarPower: true, swimmingPool: true, wifi: false,rate: 5),
-    // Place(id: 7 , name: 'place7', type: 'chalet', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 106, bathrooms:1, beds: 1, bedrooms: 1, elevator: false, furnished: true, garden: false, parking: true, priceType: true, solarPower: false, swimmingPool: false, wifi: false,rate: 5),
-    // Place(id: 8 , name: 'place8', type: 'shop', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 10, bathrooms:1, beds: 1, bedrooms: 1, elevator: false, furnished: true, garden: false, parking: true, priceType: false, solarPower: true, swimmingPool: true, wifi: true,rate: 3),
-    // Place(id: 9 , name: 'place9', type: 'room', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 160, bathrooms:1, beds: 1, bedrooms: 1, elevator: true, furnished: false, garden: false, parking: false, priceType: true, solarPower: false, swimmingPool: false, wifi: false,rate: 2),
-    // Place(id: 10, name: 'place10', type: 'home', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 130, bathrooms:1, beds: 1, bedrooms: 1, elevator: true, furnished: false, garden: false, parking: false, priceType: true, solarPower: true, swimmingPool: true, wifi: true,rate: 4),
-    // Place(id: 11, name: 'place11', type: 'room', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 10, bathrooms:1, beds: 1, bedrooms: 1, elevator: true, furnished: false, garden: false, parking: true, priceType: false, solarPower: false, swimmingPool: false, wifi: false,rate: 2),
-    // Place(id: 12, name: 'place12', type: 'shop', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 134, bathrooms:1, beds: 1, bedrooms: 1, elevator: true, furnished: false, garden: false, parking: true, priceType: true, solarPower: true, swimmingPool: true, wifi: true,rate: 4),
-    // Place(id: 13, name: 'place13', type: 'loung', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 13, bathrooms:1, beds: 1, bedrooms: 1, elevator: true, furnished: true, garden: false, parking: false, priceType: false, solarPower: false, swimmingPool: false, wifi: true,rate: 3),
-    // Place(id: 14, name: 'place14', type: 'chalet', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 140, bathrooms:1, beds: 1, bedrooms: 1, elevator: true, furnished: true, garden: false, parking: true, priceType: true, solarPower: true, swimmingPool: true, wifi: true,rate: 4),
-    // Place(id: 15, name: 'place15', type: 'villa', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 55, bathrooms:1, beds: 1, bedrooms: 1, elevator: true, furnished: true, garden: false, parking: true, priceType: false, solarPower: true, swimmingPool: true, wifi: true,rate: 2),
-    // Place(id: 16, name: 'place16', type: 'farm', image: ['https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg','https://live.staticflickr.com/4043/4438260868_cc79b3369d_z.jpg'], price: 100, bathrooms:1, beds: 1, bedrooms: 1, elevator: true, furnished: true, garden: false, parking: true, priceType: true, solarPower: true, swimmingPool: true, wifi: true,rate: 3),
-   ];
+// var placess;
+  List<Place>_places=[];
   // type
-  String _type='home';
+  String _type='HO';
   set setType(String type)
   {
     _type=type;
@@ -126,45 +110,22 @@ var placess;
    bool furnished=false;set setfurnished(bool l){furnished=l;doFilteredPlaces();notifyListeners();}
    bool elevator=false;set setelevator(bool l){elevator=l;doFilteredPlaces();notifyListeners();}
   // notification
-  bool notification=false;set setNotification(bool l){notification=l;notifyListeners();}
+  bool notification=true;set setNotification(bool l){notification=l;notifyListeners();}
+  bool notification2=true;set setNotification2(bool l){notification2=l;notifyListeners();}
 // Constructor with auth and Id
   String authToken;
-  String userId;
+  int userId;
   Places(
       this.authToken,
       this.userId,
-      this.placess
+      // this.placess
       // this._places
       );
    List<Place> get places{
      return[..._places];
    }
   List<Place>  filteredPlaces=[
-    // Place(
-    //     id: -1,
-    //     site: '',
-    //     idt: '',
-    //     image: [],
-    //     price: 0,
-    //     n_bathroom: 0,
-    //     n_bed: 0,
-    //     n_room: 0,
-    //     elevator: false,
-    //     furntiure: false,
-    //     garden: false,
-    //     parking: false,
-    //     type_r: '',
-    //     soloar_system: false,
-    //     pool: false,
-    //     wifi: false,
-    //     rating: 1,
-    //     counter: 0,
-    //     area: 0,
-    //     description: '',
-    //     floor: '',
-    //     n_salon: 0,
-    //     owner: 0,
-    // )
+
   ];
   
   // filteredPlaces=places;
@@ -183,11 +144,14 @@ var placess;
        e.price<=maxPrice&&
        (e.n_room==numBedroom||numBedroom==0)&&
        (e.n_bed==numBeds||numBeds==0)&&
-       (e.n_bathroom==numBaths||numBaths==0)
-       // (e.-20&&e.area>area+20)
+       (e.n_bathroom==numBaths||numBaths==0)&&
+       (e.area>((numArea-1)*20+80)&&e.area<(((numArea-1)*20+80)+20)||numArea==0)
+       
 
    );
+   
   }).toList();
+    
 print(filteredPlaces.length);
   notifyListeners();
   }
@@ -219,31 +183,6 @@ print(filteredPlaces.length);
   }
   int times=0;
  List<Place> placesFilterByType(String type,String text){
-    // if(times==0){fetchAndSetProduct();times++;}
-   //  if(
-   // !filteredPlaces.contains(Place(id: -1, name: '', type: '', image: [], price: 0, bathrooms: 0, beds: 0, bedrooms: 0, elevator: false, furnished: false, garden: false, parking: false, priceType: false, solarPower: false, swimmingPool: false, wifi: false,rate: 1))
-   //  // filteredPlaces.isNotEmpty
-   //  ) {
-   //    // filteredPlaces=_places;
-   //    if (text.isEmpty) {
-   //      return filteredPlaces.where((e) => e.type == type).toList();
-   //    } else {
-   //      return filteredPlaces.where((element) =>
-   //      element.name == text && element.type == type).toList();
-   //    }
-   //  }
-   //  else{
-   //    if (text.isEmpty) {
-   //      return places.where((e) => e.type == type).toList();
-   //    } else {
-   //      return places.where((element) =>
-   //      element.name == text && element.type == type).toList();
-   //  }
-   // }if (text.isEmpty) {
-   //         return filteredPlaces.where((e) => e.type == type).toList();
-   //       } else {
-   //         return filteredPlaces.where((element) =>
-   //         element.name == text && element.type == type).toList();
 
    if (text.isEmpty) {
           return filteredPlaces.where((e) => e.idt == type).toList();
@@ -281,8 +220,8 @@ print(filteredPlaces.length);
   // fetch places
   Future<void> fetchAndSetProduct()async{
 
-    var url=Uri.parse('https://my.api.mockaroo.com/test.json?key=2a7b2620');
-    var url2=Uri.parse('image');
+    var url=Uri.parse('https://dani2.pythonanywhere.com/properties/');
+    var url2=Uri.parse('https://dani2.pythonanywhere.com/images');
 
     // id image
     //id favourite
@@ -290,8 +229,25 @@ print(filteredPlaces.length);
     // http.MultipartRequest('POST', url);
     try {
       final response = await http.get(url);
+      final response2= await http.get(url2);
       final extractedData = json.decode(response.body) as List;
-      // print(extractedData[1]['id']);
+      final extractedData2 = json.decode(response2.body) as List;
+      // print(extractedData[1]);
+      // print(extractedData2[1]);
+      final finalData = extractedData2.map((element) => ({
+        element['pid']: element['image'], // Use pid as key, image as value
+        // ... add other key-value pairs if needed from element
+      })).toList();
+      final finalData2 = extractedData2.fold<Map<int, List<String>>>(
+        {},
+            (previousData, element) {
+          final pid = element['pid'];
+
+          previousData[pid] = (previousData[pid] ?? []).toList()..add('https://dani2.pythonanywhere.com/'+element['image'].toString());
+          return previousData;
+        },
+      );
+      // print(finalData2[1]);
       final List<Place>loadedProducts = [];
       // if (extractedData == null) {
       //   return;
@@ -309,7 +265,8 @@ print(filteredPlaces.length);
             id: value['id'],
             site: value['site'],
             idt: value['idt'],
-            image: value['image'], //edite
+            // image:['https://dani2.pythonanywhere.com/media/Screenshot_227_qrdPFji.png','https://dani2.pythonanywhere.com/media/Screenshot_227_qrdPFji.png'], //edite
+            image: finalData2[value['id']]==null? ['']:finalData2[value['id']]as List<String>, //edite
             price: value['price'],
             n_bathroom: value['n_bathroom'],
             n_bed: value['n_bed'],
@@ -322,17 +279,20 @@ print(filteredPlaces.length);
             soloar_system: value['soloar_system'],
             pool: value['pool'],
             wifi:value['wifi'],
-            rating: value['rating'],
+            rating: value['rating']==null?0:value['rating'],
             owner: value['owner'],
             n_salon: value['n_salon'],
-            floor: value['floor'],
+            floor: value['floor'].toString(),
             description: value['description'],
             area: double.parse(value['area'].toString()) ,
-            counter: value['counter']
+            counter: value['counter'],
+            lan: value['lan'],
+            lat: value['lat'],
+            ratestate: value['ratestate']
         )
       );
     });
-
+      print(loadedProducts.length);
     _places=loadedProducts;
     filteredPlaces=loadedProducts;
     notifyListeners();
@@ -344,72 +304,302 @@ print(filteredPlaces.length);
   }
 
   // add place
-  Future<void> addProduct(Place place) async {
-    var url=Uri.parse('https://shop-app-1f90e-default-rtdb.firebaseio.com/products.json?auth=$authToken');
+  Future<void> addProduct(Map finaldata) async {
+    // var url=Uri.parse('https://shop-app-1f90e-default-rtdb.firebaseio.com/products.json?auth=$authToken');
     // var url=Uri.https('shop-app-1f90e-default-rtdb.firebaseio.com','/products.json?auth=$authToken',);
-    try{
-      final response= await http.post(url,body:json.encode({
-        // 'title':product.title,
-        // 'description':product.description,
-        // 'imageUrl':product.imageUrl,
-        // 'price':product.price,
-        // 'creatorId':userId,
-        // 'isFavorite':product.isFavorite,
-      }) ,);
-      print(json.decode(response.body));
+    // try{
+    //   final response= await http.post(url,body:json.encode({
+    //     // 'title':product.title,
+    //     // 'description':product.description,
+    //     // 'imageUrl':product.imageUrl,
+    //     // 'price':product.price,
+    //     // 'creatorId':userId,
+    //     // 'isFavorite':product.isFavorite,
+    //   }) ,);
+    //   print(json.decode(response.body));
       // final newProduct= Place(id: place.id, site: place.site, idt: place.idt, image: place.image, price: place.price, n_bathroom: place.n_bathroom, n_bed: place.n_bed, n_room: place.n_room, elevator: place.elevator, furntiure: place.furntiure, garden: place.garden, parking: place.parking, type_r: place.type_r, soloar_system: place.soloar_system, pool: place.pool, wifi: place.wifi,rating: place.rating);
       // _places.add(newProduct);
+ // _places.add(place);
+    print(finaldata);
 
-      notifyListeners();
-    }
-    catch (erorr){
-      print(erorr);
-      throw erorr;
-    }
+    print("number before"+_places.length.toString());
+
+    try {
+      final place = Place(id: finaldata["id"],
+          counter: finaldata["counter"],
+          owner: finaldata["owner"],
+          site: finaldata["site"],
+          description: finaldata["description"].toString(),
+          floor: finaldata["floor"].toString(),
+          idt: finaldata["idt"],
+          area: finaldata["area"],
+          n_salon: finaldata["n_salon"],
+          image: finaldata["image"],
+          price: finaldata["price"],
+          n_bathroom: finaldata["n_bathroom"],
+          n_bed: finaldata["n_bed"],
+          n_room: finaldata["n_room"],
+          elevator: finaldata["elevator"],
+          furntiure: finaldata["furntiure"],
+          garden: finaldata["garden"],
+          parking: true,
+          type_r: finaldata['type_r']=='mounth'?1:2,
+          soloar_system: finaldata["soloar_system"],
+          pool: finaldata["pool"],
+          wifi: finaldata["wifi"],
+          rating: 0,
+          lan: finaldata["lan"],
+          lat: finaldata["lat"],
+          ratestate: finaldata["ratestate"]);
+      print(place);
+_places.add(place);
+
+    }catch(e){print(e);}
+      notifyListeners();print("number after"+_places.length.toString());
+    // }
+    // catch (erorr){
+    //   print(erorr);
+    //   throw erorr;
+    // }
   }
 
 // update place
-  Future<void> updateProduct(String id,Place newPlace) async{
-    final prdIndex= _places.indexWhere((e) => e.id==id);
-    if(prdIndex>=0){
-      var url=Uri.parse('https://shop-app-1f90e-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken');
-      // var url=Uri.https('shop-app-1f90e-default-rtdb.firebaseio.com','/products/$id.json');
-      await http.patch(url,body: json.encode({
-        // 'title':newProduct.title,
-        // 'description':newProduct.description,
-        // 'imageUrl':newProduct.imageUrl,
-        // 'price':newProduct.price,
-      }),);
-      _places[prdIndex]=newPlace;
-      notifyListeners();
-    }else{
-      print('sdfsafd');
-    }
+  Future<void>updatePlace(String idp,String key,String value) async{
+    var url=Uri.parse('https://dani2.pythonanywhere.com/properties/singlepro/$idp');
+    try{
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+      String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
 
+      final response = await http.put(url,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com",
+        "Referer":"https://dani2.pythonanywhere.com/properties/singlepro/$idp",
+        "X-Csrftoken":cookie.substring(10,42),
+      },
+          body: {
+            key:value
+          }
+
+      );
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      print(response.body);
+      if( key=="ratestate"){_places.firstWhere((element) => element.id==idp).ratestate=(value=='true');}
+
+      // final extractedData = json.decode(response.body) ;
+      // comments.add(Comment(id: extractedData["id"], date_time: extractedData["date_time"].toString(), comments: extractedData["comments"], idc: extractedData["idc"], idp: extractedData["idp"]));
+
+      notifyListeners();
+    }catch(e){print(e);}
   }
 
   // delete product
-// في مشكلة
-  Future<void> deleteProduct(String id)async {
-    var url=Uri.parse('https://shop-app-1f90e-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken');
-    final existingProductIndex =_places.indexWhere((element) => element.id==id);
-    Place? existingProduct=_places[existingProductIndex];
-    _places.removeAt(existingProductIndex);
+  Future<void>deletePlace(String id) async{
+    var url=Uri.parse('https://dani2.pythonanywhere.com/properties/singlepro/$id');
+print(id);
+    _places.removeWhere((element) => element.id==id);
+
+    filteredPlaces.removeWhere((element) => element.id==id);
+
+    yours.removeWhere((element) => element.id==id);
     notifyListeners();
-    // _items.insert(existingProductIndex, existingProduct!);
-
-    // _items.removeWhere((element) => element.id==id);
-    // notifyListeners();
-    final response=await http.delete(url);
-    if (response.statusCode>=400){
-      _places.insert(existingProductIndex, existingProduct!);
-
-      // _items.removeWhere((element) => element.id==id);
-      notifyListeners();
-      throw Exception('could not delete product.');
-    }
-    existingProduct=null;
+    print(_places.length);
+    print(filteredPlaces.length);
+    // try{
+    //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+    //   String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+    //   String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
+    //
+    //   final response = await http.delete(url,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com",
+    //     "Referer":"https://dani2.pythonanywhere.com/properties/singlepro/$id",
+    //     "X-Csrftoken":cookie.substring(10,42),
+    //   },
+    //
+    //
+    //   );
+    //   print(response.statusCode);
+    //   print(response.reasonPhrase);
+    //   print(response.body);
+    //
+    //   // final extractedData = json.decode(response.body) ;
+    //   // comments.add(Comment(id: extractedData["id"], date_time: extractedData["date_time"].toString(), comments: extractedData["comments"], idc: extractedData["idc"], idp: extractedData["idp"]));
+    //   print('removed');
+    //
+    // }catch(e){print(e);}
   }
 
+  // comment
+List<Comment>comments=[];
+ List<Comment>  getComments(int id){
+   return comments.where((element) => element.idp==id).toList();
+ }
+
+  Future<void>fetchAndSetComments() async{
+    var url=Uri.parse('https://dani2.pythonanywhere.com/Comments');
+    try{
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+      final response = await http.get(url,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com"});
+      final extractedData = json.decode(response.body) ;
+      final List<Comment>loadedcomments = [];
+      extractedData.forEach((element) {
+        loadedcomments.add(Comment(id: element["id"], date_time: element["date_time"], comments: element["comments"], idc: element["idc"], idp: element["idp"]));
+      });
+      comments=loadedcomments;
+      notifyListeners();
+    }catch(e){print(e);}
+  }
+ Future<void>addComment(String idp,String comment) async{
+    var url=Uri.parse('https://dani2.pythonanywhere.com/Comments/com/');
+    try{
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+      String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
+      print(idc);
+      print(idp);
+      print(comment);
+      final response = await http.post(url,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com",
+        "Referer":"https://dani2.pythonanywhere.com/Comment/com/",
+        "X-Csrftoken":cookie.substring(10,42),
+      },
+      body: {
+        "comments":comment,
+        "idc":idc,
+        "idp":idp,
+      }
+
+      );
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      print(response.body);
+      // final extractedData = json.decode(response.body) ;
+      // comments.add(Comment(id: extractedData["id"], date_time: extractedData["date_time"].toString(), comments: extractedData["comments"], idc: extractedData["idc"], idp: extractedData["idp"]));
+
+      notifyListeners();
+    }catch(e){print(e);}
+  }
+  Future<void>deleteComment(String id) async{
+    var url=Uri.parse('https://dani2.pythonanywhere.com/Comments/com/$id');
+    print(id);
+    try{
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+      String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
+
+      final response = await http.delete(url,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com",
+        "Referer":"https://dani2.pythonanywhere.com/Comment/com/$id",
+        "X-Csrftoken":cookie.substring(10,42),
+      },
+
+
+      );
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      print(response.body);
+      // final extractedData = json.decode(response.body) ;
+      // comments.add(Comment(id: extractedData["id"], date_time: extractedData["date_time"].toString(), comments: extractedData["comments"], idc: extractedData["idc"], idp: extractedData["idp"]));
+
+      notifyListeners();
+    }catch(e){print(e);}
+  }
+List<Your> yours=[];
+  Future<void>fetchAndSetYours() async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+    String id=json.decode(prefs.getString('userData')!)["userId"].toString();
+    var url=Uri.parse('https://dani2.pythonanywhere.com/properties/$id');
+    try{
+      // print(findById(15).image);
+      final response = await http.get(url,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com"});
+      final extractedData = json.decode(response.body) ;
+      final List<Your>loadedyours = [];
+      extractedData.forEach((element) {
+
+      loadedyours.add(Your(id: element["id"], name: element["site"].toString(), price:element['price'] , rate: element["rate"].toString(), ownerid: element["owner"],ratestate: element["ratestate"],images: findById(element["id"]).image));
+      });
+      yours=loadedyours;
+      print(yours[0].images);
+
+      notifyListeners();
+    }catch(e){print(e);}
+  }
+  List<OwnerPlace>ownerPlaces=[];
+  Future<void>fetchAndSetOwnerPlaces(int ownerid) async{
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+    String id=json.decode(prefs.getString('userData')!)["userId"].toString();
+    var url=Uri.parse('https://dani2.pythonanywhere.com/properties/$ownerid');
+    try{
+
+      final response = await http.get(url,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com"});
+      final extractedData = json.decode(response.body) ;
+      final List<OwnerPlace>loadedyours = [];
+      extractedData.forEach((element) {
+
+      loadedyours.add(
+          OwnerPlace(id: element["id"], name: element["site"], price: element["price"], rate: element["rate"].toString(), ownerid: element["owner"], images: findById(element["id"]).image));
+          });
+      ownerPlaces=loadedyours;
+
+      notifyListeners();
+    }catch(e){print(e);}
+  }
+
+
+}
+class Comment{
+
+ final int id;
+ final String date_time;
+ final String comments;
+ final int idc;
+ final int idp;
+ Comment({
+   required this.id,
+   required this.date_time,
+   required this.comments,
+   required this.idc,
+   required this.idp,
+});
+
+}
+class Your{
+  int id;
+  String name;
+  int price;
+  String rate;
+  int ownerid;
+  bool ratestate;
+  List images;
+  Your(
+  {
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.rate,
+    required this.ownerid,
+    required this.ratestate,
+    required this.images,
+}
+      );
+
+}
+class OwnerPlace{
+  int id;
+  String name;
+  int price;
+  String rate;
+  int ownerid;
+  List images;
+  OwnerPlace(
+  {
+    required this.id,
+    required this.name,
+    required this.price,
+    required this.rate,
+    required this.ownerid,
+
+    required this.images,
+}
+      );
 
 }

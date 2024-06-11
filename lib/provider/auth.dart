@@ -7,13 +7,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 class Auth with ChangeNotifier{
   String? _token;
   DateTime? _expiryDate;
-  String? _userId;
+  int? _userId;
   Timer? _authTimer;
+  var coockie;
   //........
   String? _name; get name {return _name;} set setName(String name){_name=name;}
-  String? _gender;get gender {return _gender;} set setGender(String gender){_gender=gender;}
+  // String? _gender;get gender {return _gender;} set setGender(String gender){_gender=gender;}
   String? _phone;  get phone {return _phone;} set setPhone(String phone){_phone=phone;}
-  String? _emaill;  get emaill {return _emaill;} set setEmail(String email){_emaill=email;}
+  String? _email;  get email {return _email;} set setEmail(String email){_email=email;}
+  String? _picture;  get picture {return _picture;} set setPicture(String picture){_picture=picture;}
   //........
   bool get isAuth{
     // print('im is auth');
@@ -31,10 +33,11 @@ class Auth with ChangeNotifier{
     print(_token);
 
     if(_token==null){print('im in get null atoken1'); return '';}
-    if(_expiryDate==DateTime(0)){print('im in get expiray atoken 2');return'';}
-    if(_expiryDate==null && _expiryDate!.isBefore(DateTime.now()) && _token!.isEmpty){print('im long expiry atoken3');return '';}
+    // if(_expiryDate==DateTime(0)){print('im in get expiray atoken 2');return'';}
+    // if(_expiryDate==null && _expiryDate!.isBefore(DateTime.now()) && _token!.isEmpty){print('im long expiry atoken3');return '';}
     // if (_expiryDate!=null && _expiryDate!.isAfter(DateTime.now()) && (_token!=null||_token!.isNotEmpty)){
-    else{print('im in ok atoken 4'); return _token;}
+    else{print('im in ok atoken 4');
+      return _token;}
 
     // }
     // return '';
@@ -51,12 +54,13 @@ class Auth with ChangeNotifier{
       }
       _token=responseData['idToken'];
       _userId=responseData['localId'];
-      setGender=responseData['gender'];
+
+      // setGender=responseData['gender'];
       setName=responseData['name'];
       setEmail=responseData['email'];
       setPhone=responseData['phone'];
-      _expiryDate=DateTime.now().add(Duration(seconds:int.parse( responseData['expiresIn'])),);
-      _autoLogout();
+      // _expiryDate=DateTime.now().add(Duration(seconds:int.parse( responseData['expiresIn'])),);
+      // _autoLogout();
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
       final userData=json.encode({
@@ -64,64 +68,88 @@ class Auth with ChangeNotifier{
         'userId':_userId,
         'expiryDate':_expiryDate?.toIso8601String(),
         'name':name,
-        'gender':gender,
+        // 'gender':gender,
         'phone':phone,
-        'email':emaill
+        'email':email
       });
       prefs.setString('userData', userData);
     }catch(error){
       throw error;
     }
   }
-  String? get userId{
-    if(_userId==null){return '';}
+  int? get userId{
+    if(_userId==null){return 0;}
     else
       return _userId;
   }
-  Future<void> login(String email,String password)async{
-    final url=Uri.parse('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDszFnoudbTo8zX6JJLhLXR3yHQjiPta9w');
+  Future<void> login(String username,String email,String password)async{
+    final prefs = await SharedPreferences.getInstance();
+    prefs.clear();
+   // final url=Uri.parse('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDszFnoudbTo8zX6JJLhLXR3yHQjiPta9w');
+    final url=Uri.parse('http://dani2.pythonanywhere.com/customer/login/');
+
     try {
-      final response = await http.post(url, body: json.encode(
-          {'email': email, 'password': password, 'returnSecureToken': true}));
+      final response = await http.post(url, body:
+          {"username":username,'email': email, 'password': password}
+      );
+      print(response.headers);
       final responseData=json.decode(response.body);
       if(responseData['error']!=null){
+        print("fault in line 91 auth");
         throw Exception(responseData['error']['message']);
+
       }
-      _token=responseData['idToken'];
-      _userId=responseData['localId'];
-      setGender=responseData['gender'];
-      setName=responseData['name'];
-      setEmail=responseData['email'];
-      setPhone=responseData['phone'];
-      _expiryDate=DateTime.now().add(Duration(seconds:int.parse( responseData['expiresIn'])),);
-      _autoLogout();
-      print('i am login 1');
+      print(responseData);
+      _token=responseData['token'].toString();
+      _userId=responseData['user']["id"];
+      // print('herre');
+      // print(response.headers["set-cookie"]!.split(' '));
+      coockie=response.headers["set-cookie"]!.split(' ')[0]+' '+response.headers["set-cookie"]!.split(' ')[9].substring(13);
+      // print(coockie);
+      // setGender=responseData['gender'];
+      setName=responseData['user']["username"].toString();
+      setEmail=responseData['user']["email"].toString();
+      setPhone=responseData['user']["phone"]==null?'0000':responseData['user']["phone"].toString();
+      setPicture=responseData['user']["picture"].toString();
+      // _expiryDate=DateTime.now().add(Duration(seconds:int.parse( responseData['expiresIn'])),);
+      // _autoLogout();
+      // print('i am login 1');
       notifyListeners();
       final prefs = await SharedPreferences.getInstance();
-      print('i am login 2');
+      // print('i am login 2');
       final userData=json.encode({
+        'cookie':coockie,
         'token':_token,
         'userId':_userId,
-        'expiryDate':_expiryDate?.toIso8601String(),
+        // 'expiryDate':_expiryDate?.toIso8601String(),
         'name':name,
-        'gender':gender,
+        'gender':'male',
         'phone':phone,
-        'email':emaill
+        'email':email,
+        'picture':picture
       });
       prefs.setString('userData', userData);
+      // print("fault in line 122 auth");
+      print(prefs.get("userData"));
     }catch(error){
+      print(error);
+      print("fault in line 120 auth");
       throw error;
     }
   }
   Future<bool> tryAutoLogin()async{
     print('i am try auto login ');
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    _token=json.decode(prefs.getString('userData')!)["token"];
+    _token=json.decode(prefs.getString('userData')!)["token"].toString();
     _userId=json.decode(prefs.getString('userData')!)["userId"];
-    _expiryDate=DateTime.parse(json.decode(prefs.getString('userData')!)["expiryDate"]);
+    setName=json.decode(prefs.getString('userData')!)["username"].toString();
+    setEmail=json.decode(prefs.getString('userData')!)["email"].toString();
+    setPhone=json.decode(prefs.getString('userData')!)["phone"];
+    setPicture=json.decode(prefs.getString('userData')!)["picture"].toString();
+    // _expiryDate=DateTime.parse(json.decode(prefs.getString('userData')!)["expiryDate"]);
     print("token done");
     notifyListeners();
-    _autoLogout();
+    // _autoLogout();
     sleep(Duration(seconds: 1));
     return true;
     // print(prefs.getString('userData'));
@@ -142,7 +170,7 @@ class Auth with ChangeNotifier{
 
   Future<void> logout()async {
     _token='';
-    _userId='';
+    _userId=0;
     _expiryDate=DateTime(0);
     if(_authTimer!=null){
       _authTimer!.cancel();
@@ -152,11 +180,11 @@ class Auth with ChangeNotifier{
     final prefs=await SharedPreferences.getInstance();
     prefs.clear();
   }
-  void _autoLogout(){
-    print('i am log out ');
-    if(_authTimer!=null){_authTimer!.cancel();}
-    final timeToExpiry= _expiryDate?.difference(DateTime.now()).inSeconds;
-    _authTimer=Timer(Duration(seconds: timeToExpiry!),() => logout(),);
-  }
+  // void _autoLogout(){
+  //   print('i am log out ');
+  //   if(_authTimer!=null){_authTimer!.cancel();}
+  //   final timeToExpiry= _expiryDate?.difference(DateTime.now()).inSeconds;
+  //   _authTimer=Timer(Duration(seconds: timeToExpiry!),() => logout(),);
+  // }
 
 }

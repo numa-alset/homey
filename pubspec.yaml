@@ -92,6 +92,8 @@ flutter:
     - assets/images/black_logo.png
     - assets/images/blue_logo.png
     - assets/images/house.png
+    - assets/images/Logo.png
+    - assets/images/Logo-Photoroom.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

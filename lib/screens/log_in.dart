@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:homey/provider/auth.dart';
 import 'dart:math';
+
+import 'package:provider/provider.dart';
 
 class LogIn extends StatefulWidget {
 
@@ -13,7 +16,9 @@ class LogIn extends StatefulWidget {
 
 class _LogInState extends State<LogIn> {
   final GlobalKey<FormState> _formKey = GlobalKey();
+
   Map<String, String> _LogInData = {
+    'username':'',
     'email': '',
     'password': '',
   };
@@ -30,7 +35,7 @@ class _LogInState extends State<LogIn> {
           ],
         ),);
   }
-  void _submite(){
+  void _submite() async{
     if (!_formKey.currentState!.validate()) {
       // Invalid!
       return;
@@ -40,12 +45,16 @@ class _LogInState extends State<LogIn> {
       _isLoading = true;
     });
     try{
+      final auth =Provider.of<Auth>(context,listen: false);
       print(_LogInData);
+     await auth.login(_LogInData["username"]!, _LogInData["email"]!, _LogInData["password"]!);
 
-      _showErrorDialog('pls try again');
-      // Navigator.of(context).popAndPushNamed('./tabScreen');
+
       Navigator.of(context).pushNamedAndRemoveUntil('./splash',(Route<dynamic> route) => false);
-    }catch(e){print(e);}
+
+      // Navigator.of(context).popAndPushNamed('./tabScreen');
+
+    }catch(e){print(e);_showErrorDialog('pls try again');}
     setState(() {
       _isLoading = false;
     });
@@ -88,6 +97,20 @@ class _LogInState extends State<LogIn> {
                         // crossAxisAlignment: CrossAxisAlignment.start,
                         // mainAxisAlignment: MainAxisAlignment.start,
                         children: [
+                          TextFormField(
+                            decoration: InputDecoration(labelText: 'Your Name',border: OutlineInputBorder(borderRadius: BorderRadius.circular(10),gapPadding: 10),constraints: BoxConstraints(maxWidth: deviceSize.width*0.9)),
+                            keyboardType: TextInputType.text,
+                            validator: (value) {
+                              if (value==null||value.isEmpty ) {
+                                return 'Invalid email!';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _LogInData['username'] = value!;
+                            },
+                          ),
+                          SizedBox(height: 30,),
                           TextFormField(
                             decoration: InputDecoration(labelText: 'Your Email',border: OutlineInputBorder(borderRadius: BorderRadius.circular(10),gapPadding: 10),constraints: BoxConstraints(maxWidth: deviceSize.width*0.9)),
                             keyboardType: TextInputType.emailAddress,

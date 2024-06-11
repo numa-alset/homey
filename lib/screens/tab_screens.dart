@@ -16,6 +16,7 @@ class _TabsScreenState extends State<TabsScreen> {
 
 
   late List<Map<String,Object>>_page ;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -36,7 +37,8 @@ class _TabsScreenState extends State<TabsScreen> {
   }
   @override
   Widget build(BuildContext context) {
-
+    int? args=ModalRoute.of(context)!.settings.arguments as int?;
+  if(args==2&&args!=null){ _selectPage(args);}
     final deviceSize=MediaQuery.of(context).size;
     // return DefaultTabController(length: 2,initialIndex: 0,animationDuration: Duration(seconds: 1), child: Scaffold(
     //   appBar: AppBar(
@@ -102,14 +104,16 @@ unselectedItemColor: Colors.white,
           BottomNavigationBarItem(
 
               icon: Stack(children: [Icon(Icons.chat_bubble_outline, ),
-             Provider.of<Places>(context).notification?
-
-             StreamBuilder(
-               stream: Stream.empty(),
-               builder: (context, snapshot) {
-                 return (snapshot.hasData)?Icon(Icons.circle,color: Colors.redAccent,size: 10,):SizedBox();
-               }
-             )
+             Provider.of<Places>(context).notification&&
+             Provider.of<Places>(context).notification2
+                 ?
+             Icon(Icons.circle,color: Colors.redAccent,size: 10,)
+             // StreamBuilder(
+             //   stream: Stream.periodic(Duration(seconds: 1),(computationCount) => computationCount+computationCount).take(5),
+             //   builder: (context, snapshot) {
+             //     return (snapshot.hasData)?Icon(Icons.circle,color: Colors.redAccent,size: 10,):SizedBox();
+             //   }
+             // )
 
                  :SizedBox()
               ]),label: 'Inbox'

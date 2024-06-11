@@ -15,14 +15,14 @@ enum HomeType {
   farm,
 }
 String  retype(int x){
-  if(x==0)return 'home';
-  if(x==1)return 'shop';
-  if(x==2)return 'lounge';
-  if(x==3)return 'room';
-  if(x==4)return 'chalet';
-  if(x==5)return 'villa';
-  if(x==6)return 'farm';
-  else return'home';
+  if(x==0)return 'HO';
+  if(x==1)return 'SH';
+  if(x==2)return 'LO';
+  if(x==3)return 'RO';
+  if(x==4)return 'CH';
+  if(x==5)return 'VI';
+  if(x==6)return 'FA';
+  else return'HO';
 }
 class Home extends StatefulWidget {
 
@@ -171,13 +171,13 @@ controller: _controller,
       body: isLoading?Center(child: CircularProgressIndicator()):TabBarView(
         controller: _controller,
         children: [
-        HomeItem(id: 1, name: 'asd', type: 'home',text:textSearch),
-        HomeItem(id: 1, name: 'asd', type: 'shop',text:textSearch),
-        HomeItem(id: 1, name: 'asd', type: 'loung',text:textSearch),
-        HomeItem(id: 1, name: 'asd', type: 'room',text:textSearch),
-        HomeItem(id: 1, name: 'asd', type: 'chalet',text:textSearch),
-        HomeItem(id: 1, name: 'asd', type: 'villa',text:textSearch),
-        HomeItem(id: 1, name: 'asd', type: 'farm',text:textSearch),
+        HomeItem(id: 1, name: 'asd', type: 'HO',text:textSearch),
+        HomeItem(id: 1, name: 'asd', type: 'SH',text:textSearch),
+        HomeItem(id: 1, name: 'asd', type: 'LO',text:textSearch),
+        HomeItem(id: 1, name: 'asd', type: 'RO',text:textSearch),
+        HomeItem(id: 1, name: 'asd', type: 'CH',text:textSearch),
+        HomeItem(id: 1, name: 'asd', type: 'VI',text:textSearch),
+        HomeItem(id: 1, name: 'asd', type: 'FA',text:textSearch),
       ],
 
 

@@ -4,10 +4,28 @@ import 'package:flutter/material.dart';
 import 'package:homey/provider/chat.dart';
 import 'package:homey/provider/places.dart';
 import 'package:provider/provider.dart';
-
+import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 class Profile extends StatelessWidget {
 
-
+  Future<String>setimage()async{
+    final prefs = await SharedPreferences.getInstance();
+   var id=json.decode(prefs.getString('userData')!)["userId"];
+    var url2=Uri.parse('https://dani2.pythonanywhere.com/images/profileimg');
+    final response2 = await http.get(url2);
+    final extractedData2 = json.decode(response2.body) as List;
+    return extractedData2.firstWhere((element) => element['cid'].toString()==id.toString())["image"].toString();
+  }
+  Future<String>setname()async{
+    final prefs = await SharedPreferences.getInstance();
+   return json.decode(prefs.getString('userData')!)["name"].toString();
+    // var url2=Uri.parse('https://dani2.pythonanywhere.com/images/profileimg');
+    // final response2 = await http.get(url2);
+    // final extractedData2 = json.decode(response2.body) as List;
+    // return extractedData2.firstWhere((element) => element['cid'].toString()==id.toString())["image"].toString();
+  }
   @override
   Widget build(BuildContext context) {
 
@@ -18,15 +36,36 @@ class Profile extends StatelessWidget {
           onTap: () => Navigator.of(context).pushNamed('./personalInfo'),
           child: ListTile(
 
-            leading: CircleAvatar(
-              // foregroundImage: Provider.of<Chat>(context).pic!=null?FileImage(Provider.of<Chat>(context).pic!):FileImage('sda'),
-              child: Provider.of<Chat>(context).pic!=null?Container(decoration: BoxDecoration(shape: BoxShape.circle),
-                  clipBehavior: Clip.antiAlias, child: Image.file(Provider.of<Chat>(context).pic!,fit: BoxFit.cover,width: double.infinity,)):Text('s'),
+            leading:
+            FutureBuilder(
+                future:setimage(),
+                builder:(context, snapshot) =>
+                snapshot.hasData?
+                CircleAvatar(backgroundImage: NetworkImage('https://dani2.pythonanywhere.com'+snapshot.data.toString()))
+                    :CircleAvatar(child: Text('s'))
+
             ),
-            title: Text(
-              'Michel Makdisi',
-              style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w400,),
+            // CircleAvatar(
+            //   // foregroundImage: Provider.of<Chat>(context).pic!=null?FileImage(Provider.of<Chat>(context).pic!):FileImage('sda'),
+            //   child: Provider.of<Chat>(context).pic!=null?Container(decoration: BoxDecoration(shape: BoxShape.circle),
+            //       clipBehavior: Clip.antiAlias, child: Image.file(Provider.of<Chat>(context).pic!,fit: BoxFit.cover,width: double.infinity,)):Text('s'),
+            // ),
+            title: FutureBuilder(
+                future:setname(),
+                builder:(context, snapshot) =>
+                snapshot.hasData?
+    Text(
+    snapshot.data.toString(),
+    style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w400,),
+    )
+                    :Text(
+    'no name',
+    style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w400,),
+    ),
+
             ),
+
+
             subtitle: Text('Show profile', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),
             trailing: GestureDetector(child: Icon(Icons.arrow_forward_ios_sharp,color:Color(0xEEEEEEEE) ,),onTap: () {Navigator.of(context).pushNamed('./personalInfo');},)
             // IconButton(color: Color(0xEEEEEEEE),icon: Icon(Icons.arrow_forward_ios_sharp) , onPressed: () => null,),
