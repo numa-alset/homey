@@ -58,7 +58,7 @@ class _YourPlacesState extends State<YourPlaces> {
                 ),
                 direction: DismissDirection.endToStart,
                 onDismissed: (direction) {
-                  Provider.of<Places>(context).deletePlace(
+                  Provider.of<Places>(context, listen: false).deletePlace(
                       provider[index].id.toString()).then((value) => setState(() {
                     provider.removeAt(index);
 

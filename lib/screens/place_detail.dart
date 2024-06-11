@@ -8,6 +8,7 @@ import 'package:homey/provider/favorite.dart';
 import 'package:homey/screens/owner_places.dart';
 import 'package:homey/widgets/circle_number.dart';
 import 'package:homey/widgets/comments.dart';
+import 'package:homey/widgets/des_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/map2.dart'as map2;
 import 'package:homey/provider/places.dart';
@@ -34,7 +35,10 @@ class _PlaceDetailState extends State<PlaceDetail> {
    }
     return listee;
    //  return image.forEach((element) {CarouselItem(image: NetworkImage(image[element]));})as List<CarouselItem>;
- }bool isLodaing=false;
+ }
+ bool isLodaing=false;
+ bool isLodaingOffer=false;
+ bool isLodaingUpdate=false;
  final _controlerTex=TextEditingController();String commentValue='';
 
 @override
@@ -172,19 +176,30 @@ class _PlaceDetailState extends State<PlaceDetail> {
           // Place Description
           // !update?
           Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Text('${place.description}',softWrap: true,maxLines: 2, style: TextStyle15,),),
-             update? Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: TextField(controller:DescriptionController ,
-
-              decoration: InputDecoration(
-
-                labelText: 'set the new des',
-                enabledBorder: InputBorder.none,
-                hintText: 'hint text',
-                suffixIcon: Icon(Icons.edit),
-              ),
-                onSubmitted: (value) => place.description=value,
-              ),
-              ):SizedBox(),
+             update?
+                 DesUpdate(place.id)
+             // Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
+             //  child: TextField(controller:DescriptionController ,
+             //
+             //  decoration: InputDecoration(
+             //
+             //    labelText: 'set the new des',
+             //    enabledBorder: InputBorder.none,
+             //    border: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white,width: 2)),
+             //
+             //    suffixIcon: isLodaingDes? CircularProgressIndicator():Icon(Icons.edit,color: Colors.white,),
+             //  ),
+             //    onSubmitted: (value) {
+             //    setState(() {
+             //      isLodaingDes=true;
+             //    });
+             //    Provider.of<Places>(context).updatePlace(place.id.toString(), 'description', value).then((value) => setState(() {
+             //      isLodaingDes=false;
+             //    }));
+             //    },
+             //  ),
+             //  )
+                 :SizedBox(),
 
           // Divider
           !update? Padding(padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10), child: Divider(),):SizedBox(),
@@ -207,28 +222,40 @@ class _PlaceDetailState extends State<PlaceDetail> {
           Padding(padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10), child: Divider(),),
 
           // what this place offer
-          Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Text('What this place offers', style: TextStyle20),),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('What this place offers', style: TextStyle20),
+              isLodaingOffer?CircularProgressIndicator():Icon(Icons.done,color: Colors.white,)
+            ],
+          ),),
 
-       update?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Wifi', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Checkbox(value: place.wifi, onChanged: (value) => setState(() {place.wifi=value as bool;}),)],))
+       update?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Wifi', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Checkbox(value: place.wifi, onChanged: (value) {setState((){isLodaingOffer=true;});Provider.of<Places>(context,listen: false).updatePlace(place.id.toString(), 'wifi', value.toString()).then((value) => setState((){isLodaingOffer=false;}));},)],))
            :place.wifi?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Wifi', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Icon(Icons.wifi,color: Colors.white,)],)):Padding(padding: EdgeInsets.zero),
-       update?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('SwimPool', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Checkbox(value: place.pool, onChanged: (value) => setState(() {place.pool=value as bool;}),)],))
+       update?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('SwimPool', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Checkbox(value: place.pool, onChanged: (value) {setState((){isLodaingOffer=true;});Provider.of<Places>(context,listen: false).updatePlace(place.id.toString(), 'pool', value.toString()).then((value) => setState((){isLodaingOffer=false;}));},)],))
            :place.pool?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('SwimPool', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Icon(Icons.pool,color: Colors.white,)],)):Padding(padding: EdgeInsets.zero),
-          update?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('SolarPower', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Checkbox(value: place.soloar_system, onChanged: (value) => setState(() {place.soloar_system=value as bool;}),)],))
+          update?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('SolarPower', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Checkbox(value: place.soloar_system, onChanged: (value) {setState((){isLodaingOffer=true;});Provider.of<Places>(context,listen: false).updatePlace(place.id.toString(), 'soloar_system', value.toString()).then((value) => setState((){isLodaingOffer=false;}));},)],))
               :place.soloar_system?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('SolarPower', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Icon(Icons.solar_power,color: Colors.white,)],)):Padding(padding: EdgeInsets.zero),
           update?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Parking', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Checkbox(value: place.parking, onChanged: (value) => setState(() {place.parking=value as bool;}),)],))
           :place.parking?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Parking', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Icon(Icons.garage,color: Colors.white,)],)):Padding(padding: EdgeInsets.zero),
-          update?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Garden', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Checkbox(value: place.garden, onChanged: (value) => setState(() {place.garden=value as bool;}),)],))
+          update?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Garden', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Checkbox(value: place.garden, onChanged: (value) {setState((){isLodaingOffer=true;});Provider.of<Places>(context,listen: false).updatePlace(place.id.toString(), 'garden', value.toString()).then((value) => setState((){isLodaingOffer=false;}));},)],))
           :place.garden?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Garden', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Icon(Icons.park_outlined,color: Colors.white,)],)):Padding(padding: EdgeInsets.zero),
-          update?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Furnished', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Checkbox(value: place.furntiure, onChanged: (value) => setState(() {place.furntiure=value as bool;}),)],))
+          update?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Furnished', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Checkbox(value: place.furntiure, onChanged: (value) {setState((){isLodaingOffer=true;});Provider.of<Places>(context,listen: false).updatePlace(place.id.toString(), 'furntiure', value.toString()).then((value) => setState((){isLodaingOffer=false;}));},)],))
           :place.furntiure?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Furnished', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Icon(Icons.chair,color: Colors.white,)],)):Padding(padding: EdgeInsets.zero),
-          update?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Elevator', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Checkbox(value: place.elevator, onChanged: (value) => setState(() {place.elevator=value as bool;}),)],))
+          update?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Elevator', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Checkbox(value: place.elevator, onChanged: (value)  {setState((){isLodaingOffer=true;});Provider.of<Places>(context,listen: false).updatePlace(place.id.toString(), 'elevator', value.toString()).then((value) => setState((){isLodaingOffer=false;}));},)],))
           :place.elevator?Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 9),child:  Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Elevator', style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 15, fontFamily: 'Lato', fontWeight: FontWeight.w300,),),Icon(Icons.elevator,color: Colors.white,)],)):Padding(padding: EdgeInsets.zero),
 
           //Divider
           Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10,),child: Divider(),),
 
          // update isME
-          update? Padding(padding: EdgeInsets.symmetric(horizontal: 20),child: Text('Update my place', style: TextStyle20),):SizedBox(),
+          update? Padding(padding: EdgeInsets.symmetric(horizontal: 20),child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Update my place', style: TextStyle20),
+              isLodaingUpdate?CircularProgressIndicator():Icon(Icons.done,color: Colors.white,)
+            ],
+          ),):SizedBox(),
           update?
     Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
@@ -245,7 +272,8 @@ class _PlaceDetailState extends State<PlaceDetail> {
       selectedColor: Color.fromRGBO(0, 173, 181, 1),
       constraints: BoxConstraints.expand(width: MediaQuery.of(context).size.width*0.2,),
       isSelected: [getNumBedroom(0),getNumBedroom(1),getNumBedroom(2),getNumBedroom(3),getNumBedroom(4),getNumBedroom(5)],
-        onPressed: (index) {setState(() {numBedroom=index;place.n_room=index;});},
+        onPressed: (index) {setState((){isLodaingUpdate=true;});Provider.of<Places>(context,listen: false).updatePlace(place.id.toString(), 'n_room', index.toString()).then((value) => setState((){isLodaingUpdate=false;}));}
+        // setState(() {numBedroom=index;place.n_room=index;});},
       ),),
       Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Text('Beds', style: TextStyle18),),
       SingleChildScrollView(
@@ -257,7 +285,8 @@ class _PlaceDetailState extends State<PlaceDetail> {
       selectedColor: Color.fromRGBO(0, 173, 181, 1),
       constraints: BoxConstraints.expand(width: MediaQuery.of(context).size.width*0.2,),
       isSelected: [getNumBed(0),getNumBed(1),getNumBed(2),getNumBed(3),getNumBed(4),getNumBed(5)],
-      onPressed: (index) {setState(() {numBed=index;place.n_bed=index;});},
+      onPressed: (index) {setState((){isLodaingUpdate=true;});Provider.of<Places>(context,listen: false).updatePlace(place.id.toString(), 'n_bed', index.toString()).then((value) => setState((){isLodaingUpdate=false;}));}
+      // {setState(() {numBed=index;place.n_bed=index;});},
       ),),
       Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Text('Bathrooms', style:TextStyle18),),
       SingleChildScrollView(
@@ -269,7 +298,9 @@ class _PlaceDetailState extends State<PlaceDetail> {
       selectedColor: Color.fromRGBO(0, 173, 181, 1),
       constraints: BoxConstraints.expand(width: MediaQuery.of(context).size.width*0.2,),
       isSelected: [getNumBathroom(0),getNumBathroom(1),getNumBathroom(2),getNumBathroom(3),getNumBathroom(4),getNumBathroom(5)],
-      onPressed: (index) {setState(() {numBathroom=index;place.n_bathroom=index;});},),),
+      onPressed: (index) {setState((){isLodaingUpdate=true;});Provider.of<Places>(context,listen: false).updatePlace(place.id.toString(), 'n_bathroom', index.toString()).then((value) => setState((){isLodaingUpdate=false;}));}
+        // setState(() {numBathroom=index;place.n_bathroom=index;});}
+        ,),),
           Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Text('Salons', style:TextStyle18),),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -280,7 +311,9 @@ class _PlaceDetailState extends State<PlaceDetail> {
               selectedColor: Color.fromRGBO(0, 173, 181, 1),
               constraints: BoxConstraints.expand(width: MediaQuery.of(context).size.width*0.2,),
               isSelected: [getNumSalon(0),getNumSalon(1),getNumSalon(2),getNumSalon(3),getNumSalon(4),getNumSalon(5)],
-              onPressed: (index) {setState(() {numBathroom=index;place.n_salon=index;});},),),
+              onPressed: (index) {setState((){isLodaingUpdate=true;});Provider.of<Places>(context,listen: false).updatePlace(place.id.toString(), 'n_salon', index.toString()).then((value) => setState((){isLodaingUpdate=false;}));}
+                // setState(() {numBathroom=index;place.n_salon=index;});}
+              ,),),
         ],
       ),
     )

@@ -383,7 +383,18 @@ _places.add(place);
       print(response.statusCode);
       print(response.reasonPhrase);
       print(response.body);
-      if( key=="ratestate"){_places.firstWhere((element) => element.id==idp).ratestate=(value=='true');}
+      if( key=="ratestate"){_places.firstWhere((element) => element.id.toString()==idp).ratestate=(value=='true');}
+      if( key=="description"){_places.firstWhere((element) => element.id.toString()==idp).description=value;}
+      if( key=="wifi"){_places.firstWhere((element) => element.id.toString()==idp).wifi=(value=='true');}
+      if( key=="pool"){_places.firstWhere((element) => element.id.toString()==idp).pool=(value=='true');}
+      if( key=="soloar_system"){_places.firstWhere((element) => element.id.toString()==idp).soloar_system=(value=='true');}
+      if( key=="garden"){_places.firstWhere((element) => element.id.toString()==idp).garden=(value=='true');}
+      if( key=="furntiure"){_places.firstWhere((element) => element.id.toString()==idp).furntiure=(value=='true');}
+      if( key=="elevator"){_places.firstWhere((element) => element.id.toString()==idp).elevator=(value=='true');}
+      if( key=="n_room"){_places.firstWhere((element) => element.id.toString()==idp).n_room=int.tryParse(value)!;}
+      if( key=="n_bathroom"){_places.firstWhere((element) => element.id.toString()==idp).n_bathroom=int.tryParse(value)!;}
+      if( key=="n_salon"){_places.firstWhere((element) => element.id.toString()==idp).n_salon=int.tryParse(value)!;}
+      if( key=="n_bed"){_places.firstWhere((element) => element.id.toString()==idp).n_bed=int.tryParse(value)!;}
 
       // final extractedData = json.decode(response.body) ;
       // comments.add(Comment(id: extractedData["id"], date_time: extractedData["date_time"].toString(), comments: extractedData["comments"], idc: extractedData["idc"], idp: extractedData["idp"]));
@@ -396,35 +407,33 @@ _places.add(place);
   Future<void>deletePlace(String id) async{
     var url=Uri.parse('https://dani2.pythonanywhere.com/properties/singlepro/$id');
 print(id);
-    _places.removeWhere((element) => element.id==id);
+    _places.removeWhere((element) => element.id.toString()==id);
 
-    filteredPlaces.removeWhere((element) => element.id==id);
-
-    yours.removeWhere((element) => element.id==id);
+    // filteredPlaces.removeWhere((element) => element.id==id);
+    //
+    // yours.removeWhere((element) => element.id==id);
     notifyListeners();
-    print(_places.length);
-    print(filteredPlaces.length);
-    // try{
-    //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-    //   String cookie=json.decode(prefs.getString('userData')!)["cookie"];
-    //   String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
-    //
-    //   final response = await http.delete(url,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com",
-    //     "Referer":"https://dani2.pythonanywhere.com/properties/singlepro/$id",
-    //     "X-Csrftoken":cookie.substring(10,42),
-    //   },
-    //
-    //
-    //   );
-    //   print(response.statusCode);
-    //   print(response.reasonPhrase);
-    //   print(response.body);
-    //
+    try{
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+      String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
+
+      final response = await http.delete(url,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com",
+        "Referer":"https://dani2.pythonanywhere.com/properties/singlepro/$id",
+        "X-Csrftoken":cookie.substring(10,42),
+      },
+
+
+      );
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      print(response.body);
+
     //   // final extractedData = json.decode(response.body) ;
     //   // comments.add(Comment(id: extractedData["id"], date_time: extractedData["date_time"].toString(), comments: extractedData["comments"], idc: extractedData["idc"], idp: extractedData["idp"]));
-    //   print('removed');
-    //
-    // }catch(e){print(e);}
+      print('removed');
+
+    }catch(e){print(e);}
   }
 
   // comment
