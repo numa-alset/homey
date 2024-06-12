@@ -12,18 +12,20 @@ List fav=[];
 get Fav{return [...fav];}
 get length {return fav.length;}
 Future<void> addFav (int id)async{
-  var url=Uri.parse('https://dani2.pythonanywhere.com/Favorites/'+userId.toString());
+  print(userId);
+  print(id);
+  var url=Uri.parse('https://dani2.pythonanywhere.com/Favorites/$userId/');
   fav.add(id);
   notifyListeners();
   try{
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token=json.decode(prefs.getString('userData')!)["token"];
+    // String token=json.decode(prefs.getString('userData')!)["token"];
     String cookie=json.decode(prefs.getString('userData')!)["cookie"];
 
     final response= await http.post(url,headers: {'Cookie': cookie,
     "Host":"dani2.pythonanywhere.com",
     "Origin":"https://dani2.pythonanywhere.com",
-    "Referer":"https://dani2.pythonanywhere.com/start/$userId",
+    "Referer":"https://dani2.pythonanywhere.com/Favorites/$userId/",
     "X-Csrftoken":cookie.substring(10,42),
     },body:{
       "idp":"$id","idc":"$userId"
@@ -38,22 +40,20 @@ Future<void> addFav (int id)async{
   }
 }
 Future<void>deleteFav(int id)async{
-  var url=Uri.parse('https://dani2.pythonanywhere.com/Favorites/'+userId.toString());
+  var url=Uri.parse('https://dani2.pythonanywhere.com/Favorites/'+userId.toString()+'/$id');
   fav.remove(id);
   notifyListeners();
   try{
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String token=json.decode(prefs.getString('userData')!)["token"];
+    // String token=json.decode(prefs.getString('userData')!)["token"];
     String cookie=json.decode(prefs.getString('userData')!)["cookie"];
 
-    final response= await http.post(url,headers: {'Cookie': cookie,
+    final response= await http.delete(url,headers: {'Cookie': cookie,
       "Host":"dani2.pythonanywhere.com",
       "Origin":"https://dani2.pythonanywhere.com",
-      "Referer":"https://dani2.pythonanywhere.com/start/$userId",
+      "Referer":"https://dani2.pythonanywhere.com/Favorites/$userId/$id",
       "X-Csrftoken":cookie.substring(10,42),
-    },body:{
-      "idp":"$id","idc":"$userId"
-    });
+    },);
     print(json.decode(response.body));
 
   }
@@ -76,6 +76,7 @@ Future<void>fetchAndSetFav()async{
     return;
   }
   extractedData.forEach((value) {
+    if(!loadedProducts.contains(value['idp']))
     loadedProducts.add(value['idp']);
   });
   print(loadedProducts);

@@ -395,6 +395,7 @@ _places.add(place);
       if( key=="n_bathroom"){_places.firstWhere((element) => element.id.toString()==idp).n_bathroom=int.tryParse(value)!;}
       if( key=="n_salon"){_places.firstWhere((element) => element.id.toString()==idp).n_salon=int.tryParse(value)!;}
       if( key=="n_bed"){_places.firstWhere((element) => element.id.toString()==idp).n_bed=int.tryParse(value)!;}
+      if( key=="price"){_places.firstWhere((element) => element.id.toString()==idp).price=int.tryParse(value)!;}
 
       // final extractedData = json.decode(response.body) ;
       // comments.add(Comment(id: extractedData["id"], date_time: extractedData["date_time"].toString(), comments: extractedData["comments"], idc: extractedData["idc"], idp: extractedData["idp"]));

@@ -19,9 +19,9 @@ class _SplashState extends State<Splash> {
   void initState() {
     // TODO: implement initState
     Provider.of<Places>(context,listen: false).fetchAndSetProduct().then((value) {
-      // Provider.of<Favourite>(context,listen: false).fetchAndSetFav().then((value) =>
-        Provider.of<Chat>(context,listen: false).setImages().then((value) =>  Navigator.of(context).pushReplacementNamed('./tabScreen'))
-      ;
+      Provider.of<Favourite>(context,listen: false).fetchAndSetFav();
+        Provider.of<Chat>(context,listen: false).setImages().then((value) =>  Navigator.of(context).pushReplacementNamed('./tabScreen'));
+      // ;
       // );
      
     });

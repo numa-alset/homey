@@ -9,6 +9,7 @@ import 'package:homey/screens/owner_places.dart';
 import 'package:homey/widgets/circle_number.dart';
 import 'package:homey/widgets/comments.dart';
 import 'package:homey/widgets/des_update.dart';
+import 'package:homey/widgets/price_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/map2.dart'as map2;
 import 'package:homey/provider/places.dart';
@@ -44,9 +45,15 @@ class _PlaceDetailState extends State<PlaceDetail> {
 @override
   void initState() {
     // TODO: implement initState
+
   Provider.of<Places>(context,listen: false).fetchAndSetComments();
     super.initState();
   }
+  // Future<void>isHimSelf()async{
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
+  //   if(idc==Provider.of<Places>(context).findById(widget.id).id.toString())
+  // }
   @override
   Widget build(BuildContext context) {
 
@@ -94,6 +101,7 @@ class _PlaceDetailState extends State<PlaceDetail> {
     int numSalon=place.n_salon;
     bool getNumSalon(int n){return numSalon==n;}
     // ................
+
     return  Scaffold(
 
       persistentFooterButtons: [
@@ -319,7 +327,20 @@ class _PlaceDetailState extends State<PlaceDetail> {
     )
               : SizedBox(),
           update? Padding(padding: EdgeInsets.symmetric(horizontal: 20,vertical: 10,),child: Divider(),):SizedBox(),
-         // Rating and reviews
+          update? Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Text('Update Price', style: TextStyle20),):SizedBox(),
+
+          // Place Description
+          // !update?
+          // Padding(padding: const EdgeInsets.symmetric(horizontal: 20), child: Text('${place.description}',softWrap: true,maxLines: 2, style: TextStyle15,),),
+          update?
+          PriceUpdate(place.id)
+
+              :SizedBox(),
+
+          // Divider
+          update? Padding(padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10), child: Divider(),):SizedBox(),
+
+          // Rating and reviews
           Padding(padding: EdgeInsets.symmetric(horizontal: 20),child: Text('Rating & reviews:', style: TextStyle20),),
 
          update? SizedBox():ListTile(

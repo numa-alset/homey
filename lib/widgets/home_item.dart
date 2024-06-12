@@ -28,6 +28,7 @@ class HomeItem extends StatelessWidget {
    final carosal= Provider.of<Places>(context);
   return RefreshIndicator(
     onRefresh: () { carosal.fetchAndSetProduct();
+    Provider.of<Favourite>(context,listen: false).fetchAndSetFav();
      return Provider.of<Chat>(context,listen: false).setImages();
 
       },
