@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:homey/provider/auth.dart';
 import 'package:homey/provider/chat.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
@@ -61,37 +62,40 @@ class _PersonalInfoState extends State<PersonalInfo> {
   }
 
   Future<void> editUserName(String value ) async {
-    final prefs = await SharedPreferences.getInstance();
-    var  userData = json.decode(prefs.getString('userData')!); // Get existing or create empty map
-print(userData);
-    userData['name'] = value; // Update the 'name' value
-    // userData['phone'] = initialPhone; // Update the 'name' value
-    // userData['email'] = initialEmail; // Update the 'name' value
-    //   print(userData);
-    // Save the updated map back to shared preferences
-    await prefs.setString('userData', json.encode(userData));
+    Provider.of<Auth>(context,listen: false).setName=value;
+//     final prefs = await SharedPreferences.getInstance();
+//     var  userData = json.decode(prefs.getString('userData')!); // Get existing or create empty map
+// print(userData);
+//     userData['name'] = value; // Update the 'name' value
+//     // userData['phone'] = initialPhone; // Update the 'name' value
+//     // userData['email'] = initialEmail; // Update the 'name' value
+//     //   print(userData);
+//     // Save the updated map back to shared preferences
+//     await prefs.setString('userData', json.encode(userData));
   }
   Future<void> editUserPhone(String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    var  userData = json.decode(prefs.getString('userData')!); // Get existing or create empty map
-// print(userData);
-//     userData['name'] = initialLegalName; // Update the 'name' value
-    userData['phone'] = value; // Update the 'name' value
-    // userData['email'] = initialEmail; // Update the 'name' value
-    //   print(userData);
-    // // Save the updated map back to shared preferences
-    await prefs.setString('userData', json.encode(userData));
+    Provider.of<Auth>(context,listen: false).setPhone=value.toString();
+//     final prefs = await SharedPreferences.getInstance();
+//     var  userData = json.decode(prefs.getString('userData')!); // Get existing or create empty map
+// // print(userData);
+// //     userData['name'] = initialLegalName; // Update the 'name' value
+//     userData['phone'] = value; // Update the 'name' value
+//     // userData['email'] = initialEmail; // Update the 'name' value
+//     //   print(userData);
+//     // // Save the updated map back to shared preferences
+//     await prefs.setString('userData', json.encode(userData));
   }
   Future<void> editUserEmail(String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    var  userData = json.decode(prefs.getString('userData')!); // Get existing or create empty map
-// print(userData);
-    // userData['name'] = initialLegalName; // Update the 'name' value
-    // userData['phone'] = initialPhone; // Update the 'name' value
-    userData['email'] = value; // Update the 'name' value
-      // print(userData);
-    // Save the updated map back to shared preferences
-    await prefs.setString('userData', json.encode(userData));
+    Provider.of<Auth>(context).setEmail=value.toString();
+//     final prefs = await SharedPreferences.getInstance();
+//     var  userData = json.decode(prefs.getString('userData')!); // Get existing or create empty map
+// // print(userData);
+//     // userData['name'] = initialLegalName; // Update the 'name' value
+//     // userData['phone'] = initialPhone; // Update the 'name' value
+//     userData['email'] = value; // Update the 'name' value
+//       // print(userData);
+//     // Save the updated map back to shared preferences
+//     await prefs.setString('userData', json.encode(userData));
   }
     Future<void> editUserGender(String value) async {
     final prefs = await SharedPreferences.getInstance();
@@ -125,8 +129,10 @@ print(userData);
   }
 
   //..........
+
   @override
   Widget build(BuildContext context) {
+   final provider= Provider.of<Auth>(context);
     return Scaffold(
 
       appBar: AppBar(
@@ -173,10 +179,10 @@ foregroundColor: Colors.white,
 
             ),
 
-            TextFormFieldBuilder(legalnameread,initialLegalName , TextInputType.text, 'Legal name',editUserName),
+            TextFormFieldBuilder(legalnameread,provider.name , TextInputType.text, 'Legal name',editUserName),
             TextFormFieldBuilder(genderRead, initialGender, TextInputType.text, 'Gender',editUserGender),
-            TextFormFieldBuilder(phoneRead, initialPhone, TextInputType.number, 'Phone number',editUserPhone),
-            TextFormFieldBuilder(emailRead, initialEmail, TextInputType.emailAddress,'Email',editUserEmail),
+            TextFormFieldBuilder(phoneRead, provider.phone, TextInputType.number, 'Phone number',editUserPhone),
+            TextFormFieldBuilder(emailRead, provider.email, TextInputType.emailAddress,'Email',editUserEmail),
              // Padding(
              //   padding: const EdgeInsets.only(top: 20),
              //   child: Row(
@@ -248,13 +254,14 @@ foregroundColor: Colors.white,
       ),
 
       keyboardType: type,
-      onFieldSubmitted: (value) async{
+      onFieldSubmitted: (value) {
         // legal = !legal;
         // print(value);
         setState(() {
           isLoading=true;
         });
-       await setValue(value);
+        setValue(value);
+       Provider.of<Auth>(context,listen: false).updateUserInfo();
         setState(() {
           legalnameread=!legal;
           isLoading=false;

@@ -67,7 +67,9 @@ class _FiltersState extends State<Filters> {
                   provider.doFilteredPlaces();
                   Navigator.of(context).pop();
                 } ,
-                    child: Text('show $numOfPlaces ${provider.type}',style: TextStyle(fontSize: 18),),
+                    child: Text('show $numOfPlaces ${
+                        provider.type=='HO'?'home':provider.type=='SH'?'shop':provider.type=='LO'?'loung':provider.type=='RO'?'room':provider.type=='CH'?'chalet':provider.type=='VI'?'villa':provider.type=='FA'?'farm':'place'
+                    }',style: TextStyle(fontSize: 18),),
                 style: ButtonStyle(shape: MaterialStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(4))),
                 backgroundColor: MaterialStatePropertyAll(Color.fromRGBO(0, 173, 181, 1)),
                   foregroundColor: MaterialStatePropertyAll(Color(0xEEEEEEEE))
@@ -93,12 +95,12 @@ class _FiltersState extends State<Filters> {
 
             Padding(padding: const EdgeInsets.only(bottom: 20), child: Text('Basics', style: hardStyle),),
 
-            (type=='room'||type=='shop'||type=='lounge')?SizedBox():Padding(padding: const EdgeInsets.symmetric(vertical: 20), child: Text('Rooms', style: liteStyle),),
-            (type=='room'||type=='shop'||type=='lounge')?SizedBox():ToggleButtonNumbers(context, 'Rooms'),
-            (type=='room'||type=='shop'||type=='lounge')?SizedBox():Padding(padding: const EdgeInsets.symmetric(vertical: 20), child: Text('Salons', style: liteStyle),),
-            (type=='room'||type=='shop'||type=='lounge')?SizedBox():ToggleButtonNumbersBeds(context, 'Salons'),
-            (type!='room')?SizedBox():Padding(padding: const EdgeInsets.symmetric(vertical: 20), child: Text('Beds', style: liteStyle),),
-            (type!='room')?SizedBox():ToggleButtonNumbersSalons(context, 'Beds'),
+            (type=='RO'||type=='SH'||type=='LO')?SizedBox():Padding(padding: const EdgeInsets.symmetric(vertical: 20), child: Text('Rooms', style: liteStyle),),
+            (type=='RO'||type=='SH'||type=='LO')?SizedBox():ToggleButtonNumbers(context, 'Rooms'),
+            (type=='RO'||type=='SH'||type=='LO')?SizedBox():Padding(padding: const EdgeInsets.symmetric(vertical: 20), child: Text('Salons', style: liteStyle),),
+            (type=='RO'||type=='SH'||type=='LO')?SizedBox():ToggleButtonNumbersBeds(context, 'Salons'),
+            (type!='RO')?SizedBox():Padding(padding: const EdgeInsets.symmetric(vertical: 20), child: Text('Beds', style: liteStyle),),
+            (type!='RO')?SizedBox():ToggleButtonNumbersSalons(context, 'Beds'),
             Padding(padding: const EdgeInsets.symmetric(vertical: 20), child: Text('Bathrooms', style:liteStyle),),
             ToggleButtonNumbersBaths(context, 'baths'),
             Padding(padding: const EdgeInsets.symmetric(vertical: 20), child: Text('Area', style:liteStyle),),
@@ -113,9 +115,9 @@ class _FiltersState extends State<Filters> {
 
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Wifi', style: aminitiStyle), Checkbox(value: provider.wifi, onChanged: (value) => provider.setwifi=value!,),],),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Solar Power', style: aminitiStyle), Checkbox(value: provider.solarPower, onChanged: (value) => provider.setsolar=value!,),],),
-            (type=='room'||type=='villa'||type=='chalet'||type=='farm'||type=='lounge')?SizedBox():Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Parking', style: aminitiStyle),Checkbox(value: provider.Parking, onChanged: (value) => provider.setparking=value!,),],),
-            (type=='room'||type=='shop'||type=='lounge')?SizedBox():Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Swimming pool', style: aminitiStyle), Checkbox(value: provider.swimmingPool, onChanged: (value) => provider.setswim=value!,),],),
-            (type=='room'||type=='villa'||type=='chalet')?SizedBox():Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Garden', style: aminitiStyle), Checkbox(value: provider.garden, onChanged: (value) => provider.setgarden=value!,),],),
+            (type=='RO'||type=='VI'||type=='CH'||type=='FA'||type=='LO')?SizedBox():Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Parking', style: aminitiStyle),Checkbox(value: provider.Parking, onChanged: (value) => provider.setparking=value!,),],),
+            (type=='RO'||type=='SH'||type=='LO')?SizedBox():Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Swimming pool', style: aminitiStyle), Checkbox(value: provider.swimmingPool, onChanged: (value) => provider.setswim=value!,),],),
+            (type=='RO'||type=='VI'||type=='CH')?SizedBox():Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Garden', style: aminitiStyle), Checkbox(value: provider.garden, onChanged: (value) => provider.setgarden=value!,),],),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Furnished', style: aminitiStyle), Checkbox(value: provider.furnished, onChanged: (value) => provider.setfurnished=value!,),],),
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Elevator', style: aminitiStyle,), Checkbox(value: provider.elevator, onChanged: (value) => provider.setelevator=value!,),],),
 

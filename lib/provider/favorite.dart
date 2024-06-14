@@ -40,7 +40,10 @@ Future<void> addFav (int id)async{
   }
 }
 Future<void>deleteFav(int id)async{
-  var url=Uri.parse('https://dani2.pythonanywhere.com/Favorites/'+userId.toString()+'/$id');
+  print(id);
+  print(userId);
+
+  var url=Uri.parse('https://dani2.pythonanywhere.com/Favorites/$userId/$id/');
   fav.remove(id);
   notifyListeners();
   try{
@@ -51,10 +54,11 @@ Future<void>deleteFav(int id)async{
     final response= await http.delete(url,headers: {'Cookie': cookie,
       "Host":"dani2.pythonanywhere.com",
       "Origin":"https://dani2.pythonanywhere.com",
-      "Referer":"https://dani2.pythonanywhere.com/Favorites/$userId/$id",
+      "Referer":"https://dani2.pythonanywhere.com/Favorites/$userId/$id/",
       "X-Csrftoken":cookie.substring(10,42),
-    },);
-    print(json.decode(response.body));
+    });
+    print(response.statusCode);
+    print(response.reasonPhrase);
 
   }
   catch (erorr){
