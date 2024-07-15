@@ -17,7 +17,7 @@ class MapSelect extends StatelessWidget {
           selectedLocationButtonTextstyle: const TextStyle(fontSize: 18),
           selectLocationButtonText: 'Set Current Location',
           selectLocationButtonLeadingIcon: const Icon(Icons.check),
-          initZoom: 14,
+          initZoom: 16,
           minZoomLevel: 5,
           maxZoomLevel: 16,
           trackMyPosition: false,
@@ -41,7 +41,8 @@ class MapSelect extends StatelessWidget {
               leftBarIndicatorColor: Colors.green,
             );
             await flush.show(context).then((value)  {
-            Navigator.of(context).pop([pickedData.latLong.latitude,pickedData.latLong.longitude,pickedData.addressData['city'].toString()]);});
+              print(pickedData.addressData.toString());
+            Navigator.of(context).pop([pickedData.latLong.latitude,pickedData.latLong.longitude,'${pickedData.addressData['neighbourhood']??''} ${pickedData.addressData['suburb']??''} ${pickedData.addressData['city']??''}']);});
 
           },
           // onChanged: (pickedData) {

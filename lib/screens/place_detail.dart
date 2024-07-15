@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:arabic_font/arabic_font.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_carousel_slider/flutter_custom_carousel_slider.dart';
 import 'package:homey/provider/auth.dart';
@@ -10,6 +12,7 @@ import 'package:homey/widgets/circle_number.dart';
 import 'package:homey/widgets/comments.dart';
 import 'package:homey/widgets/des_update.dart';
 import 'package:homey/widgets/price_update.dart';
+import 'package:pie_chart/pie_chart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/map2.dart'as map2;
 import 'package:homey/provider/places.dart';
@@ -54,6 +57,12 @@ class _PlaceDetailState extends State<PlaceDetail> {
   //   String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
   //   if(idc==Provider.of<Places>(context).findById(widget.id).id.toString())
   // }
+ int x=0;
+Future<void>AddRate (String idp,String value,String counters,String count)async
+ {
+  await Provider.of<Places>(context,listen: false).AddRate(idp, value,counters,count);
+ }
+
   @override
   Widget build(BuildContext context) {
 
@@ -63,6 +72,7 @@ class _PlaceDetailState extends State<PlaceDetail> {
    final List image=args[1];
    final bool update=args[2];
    //args[2];
+
 
 
     // print(args);
@@ -108,7 +118,7 @@ class _PlaceDetailState extends State<PlaceDetail> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            Text('\$${place.price} ${place.type_r==2?'Day':'Month'}', style: TextStyle18) ,
+            Text('${place.price}SP /${place.type_r==2?'Day':'Month'}', style: TextStyle18) ,
            isLodaing? CircularProgressIndicator():update?Text('your place', textAlign: TextAlign.center, style: TextStyle18):ElevatedButton(onPressed: () {
               goToChat();
             },
@@ -153,9 +163,22 @@ class _PlaceDetailState extends State<PlaceDetail> {
             ),
           ),
           ListTile(
-            title: Text(
-              place.site, style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 24, fontFamily: 'Lato', fontWeight: FontWeight.w600,),
+            title: Container(width: MediaQuery.of(context).size.width*0.3,
+              child: SingleChildScrollView(
+                controller:ScrollController(initialScrollOffset: BouncingScrollSimulation.maxSpringTransferVelocity),
+                scrollDirection: Axis.horizontal,
+                child: Text(utf8.decode(place.site.codeUnits) ,locale: Locale('ar'),style: ArabicTextStyle(fontWeight: FontWeight.w600,fontSize: 24,color: Color(0xFFEEEEEE),arabicFont: ArabicFont.dinNextLTArabic)
+                  // TextStyle(
+                  //   color: Color(0xFFEEEEEE),
+                  //   fontSize: 18,
+                  //   fontWeight: FontWeight.w500,
+                  // ),
+                ),
+              ),
             ),
+            // Text(
+            //   place.site, style: TextStyle(color: Color(0xFFEEEEEE), fontSize: 24, fontFamily: 'Lato', fontWeight: FontWeight.w600,),
+            // ),
             subtitle: Text('Rate ${place.rating}', style: TextStyle15,),
             trailing: isLodaing?CircularProgressIndicator() :Container(width: MediaQuery.of(context).size.width*0.3,
               child:ElevatedButton(
@@ -343,6 +366,49 @@ class _PlaceDetailState extends State<PlaceDetail> {
           // Rating and reviews
           Padding(padding: EdgeInsets.symmetric(horizontal: 20),child: Text('Rating & reviews:', style: TextStyle20),),
 
+          update? SizedBox():Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                     children: [   FutureBuilder(
+                  future:setimage(),
+                  builder:(context, snapshot) =>
+                  snapshot.hasData?
+                  CircleAvatar(backgroundImage: NetworkImage('https://dani2.pythonanywhere.com'+snapshot.data.toString()))
+
+                  // Image.network('https://dani2.pythonanywhere.com'+snapshot.data.toString(),)
+                  // NetworkImage('https://dani2.pythonanywhere.com'+snapshot.data.toString())
+                      : CircleAvatar(child: Text('s'),)
+
+              ),
+                     IconButton(onPressed:() {AddRate(place.id.toString(), '1',place.counters.toString(),place.count.toString());
+                       setState(() {
+                         x=1;
+                       });
+                       print(x);
+                     }, icon:x>=1?Icon( Icons.star,color: Colors.yellowAccent,):Icon( Icons.star_border,color: Colors.yellowAccent,)),
+                     IconButton(onPressed:() {
+                       AddRate(place.id.toString(), '2',place.counters.toString(),place.count.toString());
+                       setState(() {
+                       x=2;
+                     });}, icon:x>=2?Icon( Icons.star,color: Colors.yellowAccent,):Icon( Icons.star_border,color: Colors.yellowAccent,)),
+                     IconButton(onPressed:() { AddRate(place.id.toString(), '3',place.counters.toString(),place.count.toString());
+                       setState(() {
+                       x=3;
+                     });}, icon:x>=3?Icon( Icons.star,color: Colors.yellowAccent,):Icon( Icons.star_border,color: Colors.yellowAccent,)),
+                     IconButton(onPressed:() { AddRate(place.id.toString(), '4',place.counters.toString(),place.count.toString());
+                       setState(() {
+                       x=4;
+                     });}, icon:x>=4?Icon( Icons.star,color: Colors.yellowAccent,):Icon( Icons.star_border,color: Colors.yellowAccent,)),
+                     IconButton(onPressed:() { AddRate(place.id.toString(), '5',place.counters.toString(),place.count.toString());
+                       setState(() {
+                       x=5;
+                     });}, icon:x>=5?Icon( Icons.star,color: Colors.yellowAccent,):Icon( Icons.star_border,color: Colors.yellowAccent,)),
+                     ],
+            ),
+          ),
+          !update? Padding(padding: const EdgeInsets.symmetric(horizontal: 40,vertical: 10), child: Divider(),):SizedBox(),
+
          update? SizedBox():ListTile(
           leading: FutureBuilder(
               future:setimage(),
@@ -382,14 +448,28 @@ class _PlaceDetailState extends State<PlaceDetail> {
                 future: Provider.of<Places>(context).fetchAndSetComments(),
                 builder: (context, snapshot) => ListView.builder(
                   itemCount: comments.length,
-                  itemBuilder: (context, index) => Comments(id: comments[index].id, date_time: comments[index].date_time.substring(0,10), comments: comments[index].comments, idc: comments[index].idc, idp: comments[index].idp,isMe: Provider.of<Auth>(context).userId==place.owner,),
+                  itemBuilder: (context, index) => Comments(id: comments[index].id, date_time: comments[index].date_time.substring(0,10), comments: comments[index].comments, idc: comments[index].idc, idp: comments[index].idp,isMe: Provider.of<Auth>(context).userId==comments[index].idc,),
 
                 ) ,
               ),
             ),
-          )
+          ),
+// Chart Pie
+        update?Padding(padding: EdgeInsets.symmetric(horizontal: 20),child: Divider()):SizedBox(),
+        update?
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: PieChart(dataMap: {"good":double.parse(place.counter.toString()),"bad":double.parse((comments.length-place.counter).toString())},
+              chartType:ChartType.disc,
+                colorList: [Colors.green,Colors.red],
+                chartValuesOptions: ChartValuesOptions(showChartValuesInPercentage: true,),
 
-
+              ),
+            )
+            :SizedBox(),
+          update?
+              Center(child: place.counter>=(comments.length-place.counter)?Text("you have good reviews",style: TextStyle18,):Text("you need to read comments",style: TextStyle18,),)
+              :SizedBox(),
         ],
       ),
     );

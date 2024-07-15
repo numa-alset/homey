@@ -44,7 +44,7 @@ class Chat with ChangeNotifier {
    final response2 = await http.get(url2);
    final extractedData2 = json.decode(response2.body) as List;
 
-   Image=extractedData2;
+   Image=extractedData2.reversed.toList();
    notifyListeners();
    // print(Images);
   }

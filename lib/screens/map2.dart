@@ -65,12 +65,12 @@ class _MyAppState extends State<MyApp> {
                                   .startNavigation(
                                 // origin refers to the user's starting point at the time of starting the navigation
                                 origin: WayPoint(
-                                    latitude: widget.originLat,
-                                    longitude: widget.originLan),
+                                    latitude: 34.72781,
+                                    longitude: 36.71117),
                                 // destination refers to the end point or goal for the user at the time of starting the navigation
                                 destination: WayPoint(
-                                    latitude: widget.originLat+0.003,
-                                    longitude: widget.originLan+0.002),
+                                    latitude: widget.originLat,
+                                    longitude: widget.originLan),
                                 // if we enable this option we can choose a destination with a sustained tap
                                 setDestinationWithLongTap: false,
                                 // if we enable this option we will activate the simulation of the route

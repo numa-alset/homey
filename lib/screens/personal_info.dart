@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:homey/provider/auth.dart';
 import 'package:homey/provider/chat.dart';
@@ -50,6 +51,36 @@ class _PersonalInfoState extends State<PersonalInfo> {
     final savedImage= await File(imageFile.path).copy('${appDir.path}/$fileName');
     final prefs = await SharedPreferences.getInstance();
        // upload image
+    final prefs2 = await SharedPreferences.getInstance();
+    var idUser=json.decode(prefs.getString('userData')!)["userId"];
+    var cookie=json.decode(prefs.getString('userData')!)["cookie"];
+    var formData = FormData.fromMap({
+      "cid": idUser.toString(),
+      "image": await MultipartFile.fromFile(savedImage.path),
+    });
+
+    //dio
+    Dio dio = Dio();
+    try {
+      print(formData);
+      var response = await dio.post(
+        'https://dani2.pythonanywhere.com/images/profileimg/', data: formData,
+        options: Options(headers: {
+          "Content-Type": 'multipart/form-data',
+          'Cookie': cookie,
+          "Host": "dani2.pythonanywhere.com",
+          "Origin": "https://dani2.pythonanywhere.com",
+          "Referer": "https://dani2.pythonanywhere.com/images/profileimg/",
+          "X-Csrftoken": cookie.substring(10, 42),
+        }, receiveDataWhenStatusError: true,),
+      );
+      print(response.data);
+
+      // _finalImages.add('https://dani2.pythonanywhere.com'+response.data["image"].toString());
+    } catch (e) {
+      print(e);
+    }
+
   }
 
   Future<String>setimage()async{
@@ -58,7 +89,8 @@ class _PersonalInfoState extends State<PersonalInfo> {
     var url2=Uri.parse('https://dani2.pythonanywhere.com/images/profileimg');
     final response2 = await http.get(url2);
     final extractedData2 = json.decode(response2.body) as List;
-    return extractedData2.firstWhere((element) => element['cid'].toString()==id.toString())["image"].toString();
+    extractedData2.sort((a, b) => b['id'].compareTo(a['id']));
+    return extractedData2.firstWhere((element) => element['cid'].toString()==id.toString(),orElse:() =>  {"image":"https://dani2.pythonanywhere.com/media/APP2_2_7OlhWPI.png"})["image"].toString();
   }
 
   Future<void> editUserName(String value ) async {

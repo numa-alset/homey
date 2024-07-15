@@ -1,7 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:homey/provider/auth.dart';
 import 'dart:math';
+
+import 'package:provider/provider.dart';
 
 class SingUp extends StatefulWidget {
 
@@ -20,6 +23,7 @@ class _SingUpState extends State<SingUp> {
     'email': '',
     'password': '',
     'repeatPassword':'',
+    'phone':'',
   };
   var _isLoading = false;
   final _passwordController = TextEditingController();
@@ -43,16 +47,17 @@ class _SingUpState extends State<SingUp> {
     setState(() {
       _isLoading = true;
     });
-try{
-  Navigator.of(context).pushNamedAndRemoveUntil('./splash',(Route<dynamic> route) => false);
-    // var p= await  ()async{
-    //   sleep(Duration(milliseconds: 2000));
-    //   return 5;
-    // };
-    // sleep(Duration(milliseconds: 2000));print(_LogInData);
-    // print(p);
+    try{
+      final auth =Provider.of<Auth>(context,listen: false);
+      print(_LogInData);
+      await auth.signup(_LogInData["name"]!, _LogInData["email"]!, _LogInData["password"]!,_LogInData["phone"]!);
 
-}catch(e){}
+
+      Navigator.of(context).pushNamedAndRemoveUntil('./splash',(Route<dynamic> route) => false);
+
+      // Navigator.of(context).popAndPushNamed('./tabScreen');
+
+    }catch(e){print(e);_showErrorDialog('pls try again');}
     setState(() {
       _isLoading = false;
     });
@@ -162,6 +167,20 @@ try{
                                },
                             onSaved: (value) {
                               _LogInData['repeatPassword'] = value!;
+                            },
+                          ),
+                          SizedBox(height: 30,),
+                          TextFormField(
+                            decoration: InputDecoration(labelText: 'Your Phone',border: OutlineInputBorder(borderRadius: BorderRadius.circular(10),gapPadding: 10),constraints: BoxConstraints(maxWidth: deviceSize.width*0.9)),
+                            keyboardType: TextInputType.number,
+                            validator: (value) {
+                              if (value==null||value.isEmpty||value.substring(0,2)!='09' ) {
+                                return 'Invalid Phone';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) {
+                              _LogInData['phone'] = value!;
                             },
                           ),
                           SizedBox(height: 30,),

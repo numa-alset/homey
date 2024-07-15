@@ -34,7 +34,7 @@ class _ListYourPlaceState extends State<ListYourPlace> {
   int indexImage=0;
   Map<String, String> _ListData = {
     'idt':'',
-    'description':'s',
+    'description':'',
     'price': '',
     'area': '',
     'site':'Homs',
@@ -52,13 +52,10 @@ class _ListYourPlaceState extends State<ListYourPlace> {
     'pool':'false',
     'elevator':'false',
     'soloar_system':'false',
-    'owner':'',
-      'counter':'0',
+    'counters':'5',
     'rate':'0',
-    'counters':'0',
-    'count':'0'
-
-
+    'rating':'0',
+    'ratestate':"true"
   };
   List<String> _finalImages=[];
   Map _finaldata={};
@@ -204,9 +201,9 @@ hintStyle: TextStyle(color: Colors.white),
                 child: ElevatedButton(onPressed: () {
                   // _addLocation();
                   Navigator.of(context).push(MaterialPageRoute(builder: (context) => MapSelect(),)).then((value) {
-                    _ListData['lat']=value[0];
-                    _ListData['lan']=value[1];
-                    _ListData['site']=value[2];
+                    _ListData['lat']=value[0].toString();
+                    _ListData['lan']=value[1].toString();
+                    _ListData['site']=value[2].toString();
                     setState(() {
                       isFinished=true;
                     });
@@ -837,78 +834,75 @@ hintStyle: TextStyle(color: Colors.white),
           indexImage=i+1;
         });
         var formData = FormData.fromMap({
-          "pid": '10',
+          "pid": idUser.toString(),
           "image": await MultipartFile.fromFile(selectedImages[i].path),
         });
-        //http
-        // var request = http.MultipartRequest('POST', Uri.parse('https://dani2.pythonanywhere.com/images/'));
-        //   request.fields["pid"]=idUser.toString();
-        //   request.files.add(http.MultipartFile.fromBytes('image', File(selectedImages[i].path).readAsBytesSync(),filename:selectedImages[i].path.split('/').last ));
-        // var res = await request.send();
-        // print(res.stream.last);
-        // print(res.contentLength);
-        // print(res.headers);
-        // print(res.headersSplitValues);
-        // print(res.reasonPhrase);
-        // print(res);
 
         //dio
         Dio dio = Dio();
+      // to local server
         try {
-          print(formData);
-          var response = await dio.post(
-            'https://dani2.pythonanywhere.com/images/', data: formData,
-            options: Options(headers: {
-              "Content-Type": 'multipart/form-data',
-              'Cookie': cookie,
-              "Host": "dani2.pythonanywhere.com",
-              "Origin": "https://dani2.pythonanywhere.com",
-              "Referer": "https://dani2.pythonanywhere.com/images/",
-              "X-Csrftoken": cookie.substring(10, 42),
-            }, receiveDataWhenStatusError: true,),
-          );
-          print(response.data);
-          // print(response.statusCode);
 
-          // filename:
-          // print(selectedImages[0].path
-          //     .split('/')
-          //     .last);
-          // print(response.extra);
-          // print(response.statusMessage);
-          // print(response);
-          _finalImages.add('https://dani2.pythonanywhere.com'+response.data["image"].toString());
+          if(i!=1
+          // response.statusCode==200||response.statusCode==204
+          ){
+            try {
+              print(formData);
+              var response = await dio.post(
+                'https://dani2.pythonanywhere.com/images/', data: formData,
+                options: Options(headers: {
+                  "Content-Type": 'multipart/form-data',
+                  'Cookie': cookie,
+                  "Host": "dani2.pythonanywhere.com",
+                  "Origin": "https://dani2.pythonanywhere.com",
+                  "Referer": "https://dani2.pythonanywhere.com/images/",
+                  "X-Csrftoken": cookie.substring(10, 42),
+                }, receiveDataWhenStatusError: true,),
+              );
+              print(response.data);
+              _finalImages.add('https://dani2.pythonanywhere.com'+response.data["image"].toString());
+            } catch (e) {
+              print(e);
+            }
+          }else{
+        final  flush2=  Flushbar(
+              message: 'Image Rejected By AI',
+              flushbarStyle: FlushbarStyle.FLOATING,
+              margin: EdgeInsets.all(8.0),
+              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+              icon: Icon(
+                Icons.warning_outlined,
+                size: 28.0,
+                color: Colors.red,
+              ),
+              duration: Duration(milliseconds: 1500),
+              leftBarIndicatorColor: Colors.red,
+            );
+        // Future.delayed(Duration(seconds: 2)).then((value) => flush2.show(context)).then((value) => pr);
+          await  flush2.show(context).then((value) => print('finifsh'));
+          }
         } catch (e) {
           print(e);
         }
+        // try {
+        //   print(formData);
+        //   var response = await dio.post(
+        //     'https://dani2.pythonanywhere.com/images/', data: formData,
+        //     options: Options(headers: {
+        //       "Content-Type": 'multipart/form-data',
+        //       'Cookie': cookie,
+        //       "Host": "dani2.pythonanywhere.com",
+        //       "Origin": "https://dani2.pythonanywhere.com",
+        //       "Referer": "https://dani2.pythonanywhere.com/images/",
+        //       "X-Csrftoken": cookie.substring(10, 42),
+        //     }, receiveDataWhenStatusError: true,),
+        //   );
+        //   print(response.data);
+        //   _finalImages.add('https://dani2.pythonanywhere.com'+response.data["image"].toString());
+        // } catch (e) {
+        //   print(e);
+        // }
       }
-      // //third
-      // var request = http.MultipartRequest(
-      //   'POST',
-      //   Uri.parse('https://dani2.pythonanywhere.com/images/'),
-      // );
-      // Map<String, String> headers = {"Content-type": "multipart/form-data",'Cookie': cookie,
-      //     "Host":"dani2.pythonanywhere.com",
-      //     "Origin":"https://dani2.pythonanywhere.com",
-      //     "Referer":"https://dani2.pythonanywhere.com/images/",
-      //   "X-Csrftoken":cookie.substring(10,42),
-      // };
-      // request.files.add(
-      //   http.MultipartFile(
-      //     'image',
-      //     selectedImages[0].readAsBytes().asStream(),
-      //     selectedImages[0].lengthSync(),
-      //     filename: selectedImages[0].path.split('/').last,
-      //   ),
-      // );
-      // request.fields.addAll({"pid":"3"});
-      // request.headers.addAll(headers);
-      // print("request: " + request.toString());
-      // var res = await request.send();
-      // print(res.stream);
-      // http.Response response = await http.Response.fromStream(res);
-      // print(response.body);
-
 
       //
       await Provider.of<Places>(context,listen: false).addProduct({..._finaldata,...{"image":_finalImages}});

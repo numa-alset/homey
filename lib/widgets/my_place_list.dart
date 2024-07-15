@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 
+import 'package:arabic_font/arabic_font.dart';
 import 'package:flutter/material.dart';
 import 'package:homey/provider/places.dart';
 import 'package:provider/provider.dart';
@@ -96,13 +98,17 @@ await Provider.of<Places>(context,listen: false).updatePlace(widget.id.toString(
       child: ListTile(
         title: GestureDetector(
           onTap: () => Navigator.of(context).pushNamed('./matrial',arguments:  [widget.id,widget.image,true] as List),
-          child: Text(
-            widget.name,
-            style: TextStyle(
-              color: Color(0xFFEEEEEE),
-              fontSize: 20,
-              fontFamily: 'Lato',
-              fontWeight: FontWeight.w600,
+          child: Container(width: MediaQuery.of(context).size.width*0.3,
+            child: SingleChildScrollView(
+              controller:ScrollController(initialScrollOffset: BouncingScrollSimulation.maxSpringTransferVelocity),
+              scrollDirection: Axis.horizontal,
+              child: Text(utf8.decode(widget.name.codeUnits) ,locale: Locale('ar'),style: ArabicTextStyle(arabicFont: ArabicFont.dinNextLTArabic,fontSize: 18,fontWeight: FontWeight.w500,color: Colors.white)
+                // TextStyle(
+                //   color: Color(0xFFEEEEEE),
+                //   fontSize: 18,
+                //   fontWeight: FontWeight.w500,
+                // ),
+              ),
             ),
           ),
         ),

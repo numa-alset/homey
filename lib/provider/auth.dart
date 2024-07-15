@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 class Auth with ChangeNotifier{
@@ -43,59 +46,70 @@ class Auth with ChangeNotifier{
     // return '';
   }
 
-  Future<void> signup(String username,String email,String password)async{
+  Future<void> signup(String username,String email,String password,String phone)async{
     final prefs = await SharedPreferences.getInstance();
     prefs.clear();
     // final url=Uri.parse('https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDszFnoudbTo8zX6JJLhLXR3yHQjiPta9w');
-    final url=Uri.parse('http://dani2.pythonanywhere.com/auth/registration/');
+    final url=Uri.parse('https://dani2.pythonanywhere.com/customer/');
 
     try {
       final response = await http.post(url, body:
-      {"username":username,'email': email, 'password': password}
+      {"username":username,'email': email, 'password': password,'password2':password,'phone':phone,"first_name": "l", "last_name": "l",'user_type': 'BU'}
       );
-      print(response.headers);
-      print(response.headers["set-cookie"]!.split(' ')[0]+' '+response.headers["set-cookie"]!.split(' ')[9].substring(13));
       final responseData=json.decode(response.body);
-      if(responseData['error']!=null){
-        print("fault in line 91 auth");
-        throw Exception(responseData['error']['message']);
 
-      }
       print(responseData);
-      // _token=responseData['token'].toString();
-      _userId=responseData['user']["id"];
-      // print('herre');
-      // print(response.headers["set-cookie"]!.split(' '));
-      coockie=response.headers["set-cookie"]!.split(' ')[0]+' '+response.headers["set-cookie"]!.split(' ')[9].substring(13);
-      // print(coockie);
-      // setGender=responseData['gender'];
-      setName=responseData['user']["username"].toString();
-      setEmail=responseData['user']["email"].toString();
-      setPhone=responseData['user']["phone"]==null?'0000':responseData['user']["phone"].toString();
-      setPicture=responseData['user']["picture"].toString();
-      // _expiryDate=DateTime.now().add(Duration(seconds:int.parse( responseData['expiresIn'])),);
-      // _autoLogout();
-      // print('i am login 1');
-      notifyListeners();
-      final prefs = await SharedPreferences.getInstance();
-      // print('i am login 2');
-      final userData=json.encode({
-        'cookie':coockie,
-        'token':_token,
-        'userId':_userId,
-        // 'expiryDate':_expiryDate?.toIso8601String(),
-        'name':name,
-        'gender':'male',
-        'phone':phone,
-        'email':email,
-        'picture':picture
-      });
-      prefs.setString('userData', userData);
-      // print("fault in line 122 auth");
-      print(prefs.get("userData"));
+      // var formData =  FormData.fromMap({
+      //   "pid": await responseData["id"].toString(),
+      //   "image": await MultipartFile.fromFile('assets/images/Logo.png'),
+      // });
+
+      if (response.statusCode>=200) {
+        await login(responseData["username"].toString(),
+            responseData["email"].toString(), password).then((value) async{
+
+          // final savedImage= await File().copy('${appDir.path}/$fileName');
+          final prefs2 = await SharedPreferences.getInstance();
+          var idUser=json.decode(prefs2.getString('userData')!)["userId"];
+          var cookie=json.decode(prefs2.getString('userData')!)["cookie"];
+          var image= (await rootBundle.load('assets/images/Logo.png')).buffer.asUint8List();
+          var formData = FormData.fromMap({
+            "cid": idUser.toString(),
+            "image": await MultipartFile.fromBytes(
+              image,filename: 'Logo.png', // Adjust filename if needed
+              contentType: MediaType('image', 'png'),
+              // 'assets/images/house.png'
+            ),
+          });
+
+          //dio
+          Dio dio = Dio();
+          try {
+            print(formData);
+            var response = await dio.post(
+              'https://dani2.pythonanywhere.com/images/profileimg/', data: formData,
+              options: Options(headers: {
+                "Content-Type": 'multipart/form-data',
+                'Cookie': cookie,
+                "Host": "dani2.pythonanywhere.com",
+                "Origin": "https://dani2.pythonanywhere.com",
+                "Referer": "https://dani2.pythonanywhere.com/images/profileimg/",
+                "X-Csrftoken": cookie.substring(10, 42),
+              }, ),
+            );
+            print(response.statusMessage);
+            return 'done';
+            // _finalImages.add('https://dani2.pythonanywhere.com'+response.data["image"].toString());
+          } catch (e) {
+            print(e);
+            return 'undone';
+          }
+
+        }).then((value) => print(value));
+      }
     }catch(error){
       print(error);
-      print("fault in line 120 auth");
+      print("unable to signup");
       throw error;
     }
   }

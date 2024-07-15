@@ -1,5 +1,10 @@
+import 'dart:convert';
+
+import 'package:arabic_font/arabic_font.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_custom_carousel_slider/flutter_custom_carousel_slider.dart';
 import 'package:homey/provider/chat.dart';
 import 'package:homey/provider/favorite.dart';
@@ -93,14 +98,19 @@ class HomeItem extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          Text(places[index].site,style: TextStyle(
-                            color: Color(0xFFEEEEEE),
-                            fontSize: 18,
-                            fontFamily: 'Lato',
-                            fontWeight: FontWeight.w500,
-                            height: 0.06,
-                            letterSpacing: 0.09,
-                          ),),
+                          Container(width: MediaQuery.of(context).size.width*0.3,
+                            child: SingleChildScrollView(
+                              controller:ScrollController(initialScrollOffset: BouncingScrollSimulation.maxSpringTransferVelocity),
+                              scrollDirection: Axis.horizontal,
+                              child: Text(utf8.decode(places[index].site.codeUnits) ,locale: Locale('ar'),style: ArabicTextStyle(arabicFont: ArabicFont.dinNextLTArabic,fontSize: 18,fontWeight: FontWeight.w500)
+                              // TextStyle(
+                              //   color: Color(0xFFEEEEEE),
+                              //   fontSize: 18,
+                              //   fontWeight: FontWeight.w500,
+                              // ),
+                              ),
+                            ),
+                          ),
                           Icon(Icons.location_on,color: Colors.white,)
                         ],
                       ),
@@ -122,7 +132,7 @@ class HomeItem extends StatelessWidget {
                     TextSpan(
                       children: [
                         TextSpan(
-                          text: '\$${places[index].price} SP ',
+                          text: '${places[index].price} SP ',
                           style: TextStyle(
                             color: Color(0xFFEEEEEE),
                             fontSize: 18,

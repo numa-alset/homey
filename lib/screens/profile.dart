@@ -16,7 +16,9 @@ class Profile extends StatelessWidget {
     var url2=Uri.parse('https://dani2.pythonanywhere.com/images/profileimg');
     final response2 = await http.get(url2);
     final extractedData2 = json.decode(response2.body) as List;
-    return extractedData2.firstWhere((element) => element['cid'].toString()==id.toString())["image"].toString();
+    extractedData2.sort((a, b) => b['id'].compareTo(a['id']));
+    return extractedData2.firstWhere((element) => element['cid'].toString()==id.toString(),orElse:() =>  {"image":"https://dani2.pythonanywhere.com/media/APP2_2_7OlhWPI.png"})["image"].toString();
+
   }
   Future<String>setname()async{
     final prefs = await SharedPreferences.getInstance();

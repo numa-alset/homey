@@ -21,12 +21,18 @@ class Place{
   bool elevator;
   int rating;
   int counter;
+  int counters;
+  int count;
+  int rate;
   int owner;
   double lan;
   double lat;
   bool ratestate;
 
   Place({
+    required this.counters,
+    required this.count,
+    required this.rate,
     required this.id,
     required this.counter,
     required this.owner,

@@ -15,6 +15,7 @@ import 'package:homey/screens/place_detail.dart';
 import 'package:homey/screens/sign_up.dart';
 import 'package:homey/screens/tab_screens.dart';
 import 'package:homey/screens/your_places.dart';
+import 'package:homey/splash/splash_waiting.dart';
 import 'package:provider/provider.dart';
 import './screens/personal_info.dart';
 import './splash/splash.dart';
@@ -55,8 +56,8 @@ class MyApp extends StatelessWidget {
             bottomNavigationBarTheme: BottomNavigationBarThemeData(backgroundColor:Color.fromRGBO(57, 62, 70, 1), ),
           ),
           home:
-          // auth.isAuth?TabsScreen()  :FutureBuilder(future: auth.tryAutoLogin(), builder: (context, snapshot) =>snapshot.connectionState==ConnectionState.waiting? SplashWaiting(): OpenApp(),),
-          OpenApp(),
+          auth.isAuth?Splash()  :FutureBuilder(future: auth.tryAutoLogin(), builder: (context, snapshot) =>snapshot.connectionState==ConnectionState.waiting? SplashWaiting(): OpenApp(),),
+          // OpenApp(),
             routes: {
             './tabScreen':(context) => TabsScreen(),
             './matrial':(context) => PlaceDetail(),

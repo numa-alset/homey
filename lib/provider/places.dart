@@ -142,6 +142,7 @@ class Places with ChangeNotifier{
        (e.type_r==priceMonthly||_priceMonthly==0)&&
        e.price>=minPrice&&
        e.price<=maxPrice&&
+           e.ratestate==true&&
        (e.n_room==numBedroom||numBedroom==0)&&
        (e.n_bed==numBeds||numBeds==0)&&
        (e.n_bathroom==numBaths||numBaths==0)&&
@@ -151,7 +152,8 @@ class Places with ChangeNotifier{
    );
    
   }).toList();
-    
+    filteredPlaces.sort((a, b) => b.counter.compareTo(a.counter),);
+    // print(filteredPlaces[2].count);
 print(filteredPlaces.length);
   notifyListeners();
   }
@@ -161,7 +163,7 @@ print(filteredPlaces.length);
     _numBaths=0;
     _numSalons=0;
     _minPrice=1;
-    _maxPrice=100000;
+    _maxPrice=10000000000;
     _numArea=0;
     _priceMonthly=0;
     wifi=false;
@@ -288,13 +290,16 @@ print(filteredPlaces.length);
             counter: value['counter'],
             lan: value['lan'],
             lat: value['lat'],
-            ratestate: value['ratestate']
+            ratestate: value['ratestate'],
+            rate: value["rate"]==null?0:value["rate"],
+            count: value["count"]==null?0:value["count"],
+            counters: value["counters"]==null?0:value["counters"]
         )
       );
     });
       print(loadedProducts.length);
     _places=loadedProducts;
-    filteredPlaces=loadedProducts;
+    filteredPlaces=_places.where((element) => element.ratestate==true).toList();
     notifyListeners();
     print('done');
     }catch(e){
@@ -350,7 +355,11 @@ print(filteredPlaces.length);
           rating: 0,
           lan: finaldata["lan"],
           lat: finaldata["lat"],
-          ratestate: finaldata["ratestate"]);
+          ratestate: true,
+          rate: 0,
+          count: 0,
+          counters:5
+      );
       print(place);
 _places.add(place);
 
@@ -459,33 +468,120 @@ List<Comment>comments=[];
     }catch(e){print(e);}
   }
  Future<void>addComment(String idp,String comment) async{
+    //add to pythonanywhere
     var url=Uri.parse('https://dani2.pythonanywhere.com/Comments/com/');
+    //add to local server to update counters and rate
+    var url2=Uri.parse('https://fd0b-94-47-62-65.ngrok-free.app/Comments/com/');
+    // fetch property from local server
+    var url3=Uri.parse('https://fd0b-94-47-62-65.ngrok-free.app/properties/singlepro/13');
+    // update property on pythonanywhere
+    var url4=Uri.parse('https://dani2.pythonanywhere.com/properties/singlepro/$idp');
+    // ........
+    // url2
+    // try{
+    //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+    //   String cookie="abuse_interstitial=fd0b-94-47-62-65.ngrok-free.app; csrftoken=CtpHKTCNS4vEcmCge9shcsb7yagB9Il1; sessionid=50f7p32zwlfufuilmw4n7pkmy4u028g7;";
+    //   String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
+    //   // update coockie manually
+    //   final response2 = await http.post(url2,headers: {
+    //     'Cookie': cookie,
+    //     "Origin":"https://fd0b-94-47-62-65.ngrok-free.app",
+    //     "Referer":"https://fd0b-94-47-62-65.ngrok-free.app/Comments/com/",
+    //     "X-Csrftoken":"CtpHKTCNS4vEcmCge9shcsb7yagB9Il1",
+    //   },
+    //       body: {"comments":comment, "idc":idc, "idp":'13',}
+    //   );
+    //   print("in respose2");
+    //   if (response2.statusCode==200||response2.statusCode==201){
+    //     print("in respose3");
+    //     // url3
+    //     try{
+    //       // update coockie manually
+    //       final SharedPreferences prefs = await SharedPreferences.getInstance();
+    //       String cookie="abuse_interstitial=fd0b-94-47-62-65.ngrok-free.app; csrftoken=CtpHKTCNS4vEcmCge9shcsb7yagB9Il1; sessionid=50f7p32zwlfufuilmw4n7pkmy4u028g7;";
+    //       String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
+    //       final response3 = await http.get(url3,headers: {
+    //         'Cookie': cookie,
+    //         // "Host":"dani2.pythonanywhere.com",
+    //         // "Referer":"https://dani2.pythonanywhere.com/Comment/com/",
+    //         // "X-Csrftoken":cookie.substring(10,42),
+    //         },
+    //       );
+    //       final extractedData = json.decode(response3.body) ;
+    //       print("in respose done");
+    //       if(response3.statusCode==200||response2.statusCode==201){
+    //         print("in respose4");
+    //         try{
+    //           final SharedPreferences prefs = await SharedPreferences.getInstance();
+    //           String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+    //           String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
+    //
+    //           final response4 = await http.put(url4,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com",
+    //             "Referer":"https://dani2.pythonanywhere.com/properties/singlepro/$idp",
+    //             "X-Csrftoken":cookie.substring(10,42),
+    //           },
+    //               body: {
+    //                 "counter":(extractedData["counter"]==null||extractedData["counter"]=='null')?'0':extractedData["counter"].toString(),
+    //
+    //               }
+    //
+    //           );
+    //           print('status code for response 4 ${response4.statusCode}');
+    //           print('reason code for response 4 ${response4.reasonPhrase}');
+    //           print(_places.firstWhere((element) => element.id.toString()==idp).counter);
+    //           _places.firstWhere((element) => element.id.toString()==idp).counter=int.parse((extractedData["counter"]==null||extractedData["counter"]=='null')?'0':extractedData["counter"].toString());
+    //           _places.firstWhere((element) => element.id.toString()==idp).count=int.parse((extractedData["count"]==null||extractedData["count"]=='null')?'0':extractedData["count"].toString());
+    //
+    //           notifyListeners();
+    //           print(_places.firstWhere((element) => element.id.toString()==idp).counter);
+    //         }catch(e){print(e);}
+    //       }
+    //
+    //     }catch(e){print(e);}
+    //   }
+    //   else{
+    //     print(response2.statusCode);
+    //     print(response2.reasonPhrase);
+    //     print("done");}
+    // }catch(e){print(e);}
+
     try{
+      print("in respose1");
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       String cookie=json.decode(prefs.getString('userData')!)["cookie"];
       String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
-      print(idc);
-      print(idp);
-      print(comment);
-      final response = await http.post(url,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com",
-        "Referer":"https://dani2.pythonanywhere.com/Comment/com/",
-        "X-Csrftoken":cookie.substring(10,42),
-      },
-      body: {
-        "comments":comment,
-        "idc":idc,
-        "idp":idp,
-      }
-
+      final response = await http.post(url,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com", "Referer":"https://dani2.pythonanywhere.com/Comment/com/", "X-Csrftoken":cookie.substring(10,42),},
+      body: {"comments":comment, "idc":idc, "idp":idp,}
       );
-      print(response.statusCode);
-      print(response.reasonPhrase);
-      print(response.body);
-      // final extractedData = json.decode(response.body) ;
-      // comments.add(Comment(id: extractedData["id"], date_time: extractedData["date_time"].toString(), comments: extractedData["comments"], idc: extractedData["idc"], idp: extractedData["idp"]));
+      print("in respose1 done");
+      if(comment.contains("good")||comment.contains("great")&&response.statusCode>=200){
+        try{
+          final SharedPreferences prefs = await SharedPreferences.getInstance();
+          String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+          String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
 
+          final response4 = await http.put(url4,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com",
+            "Referer":"https://dani2.pythonanywhere.com/properties/singlepro/$idp",
+            "X-Csrftoken":cookie.substring(10,42),
+          },
+              body: {
+                // "counter":(extractedData["counter"]==null||extractedData["counter"]=='null')?'0':extractedData["counter"].toString(),
+                "counter":(findById(int.parse(idp)).counter+1).toString()
+              }
+
+          );
+          print('status code for response 4 ${response4.statusCode}');
+          print('reason code for response 4 ${response4.reasonPhrase}');
+          print(_places.firstWhere((element) => element.id.toString()==idp).counter);
+          _places.firstWhere((element) => element.id.toString()==idp).counter+=1;
+          notifyListeners();
+          print(_places.firstWhere((element) => element.id.toString()==idp).counter);
+        }catch(e){print(e);}
+      }
       notifyListeners();
     }catch(e){print(e);}
+
+
   }
   Future<void>deleteComment(String id) async{
     var url=Uri.parse('https://dani2.pythonanywhere.com/Comments/com/$id');
@@ -553,7 +649,33 @@ List<Your> yours=[];
       notifyListeners();
     }catch(e){print(e);}
   }
+// send a rate
+  Future<void>AddRate(String idp,String value,String counters,String count) async{
+    var url=Uri.parse('https://dani2.pythonanywhere.com/properties/singlepro/$idp');
+    try{
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      String cookie=json.decode(prefs.getString('userData')!)["cookie"];
+      String idc=json.decode(prefs.getString('userData')!)["userId"].toString();
 
+      final response = await http.put(url,headers: {'Cookie': cookie,"Host":"dani2.pythonanywhere.com",
+        "Referer":"https://dani2.pythonanywhere.com/properties/singlepro/$idp",
+        "X-Csrftoken":cookie.substring(10,42),
+      },
+          body: {
+            "counters":value,
+          }
+
+      );
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      print(response.body);
+      final extractedData= json.decode(response.body);
+      _places.firstWhere((element) => element.id.toString()==idp).rating=int.parse(extractedData["rating"]==null?'0':extractedData["rating"].toString());
+      _places.firstWhere((element) => element.id.toString()==idp).counters=int.parse(extractedData["counters"]==null?'0':extractedData["counters"].toString());
+      _places.firstWhere((element) => element.id.toString()==idp).count=int.parse(extractedData["count"]==null?'0':extractedData["count"].toString());
+      notifyListeners();
+    }catch(e){print(e);}
+  }
 
 }
 class Comment{
