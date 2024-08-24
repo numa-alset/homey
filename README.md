@@ -16,6 +16,6 @@ help you find best property for rental based on filters and chat directly with o
 ✔️ Robust , Scalable and reliable app up to 100K property \
 
 ### The App
-you can installed via drive with this link  **[click here](https://drive.google.com/drive/folders/13y_tSIEy404VY4wVkIXvsy8QL5uS1Ft4)**.
-#### GIF Demo
+you can see demo video via drive with this link  **[click here](https://drive.google.com/drive/folders/13y_tSIEy404VY4wVkIXvsy8QL5uS1Ft4)**.
+
 
